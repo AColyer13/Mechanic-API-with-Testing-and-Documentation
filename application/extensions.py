@@ -10,6 +10,7 @@ from jose import jwt, JWTError
 from datetime import datetime, timedelta
 from functools import wraps
 from flask import request, jsonify, current_app
+import os
 
 # Initialize extensions
 db = SQLAlchemy()
@@ -24,6 +25,7 @@ cache = Cache()
 # JWT Token Functions
 ALGORITHM = "HS256"
 TOKEN_EXPIRATION_HOURS = 24
+SECRET_KEY = os.environ.get('SECRET_KEY') or "super secret secrets"
 
 def encode_token(customer_id):
     """
@@ -41,7 +43,7 @@ def encode_token(customer_id):
         'sub': str(customer_id)  # Convert to string for JWT
     }
     
-    return jwt.encode(payload, current_app.config['SECRET_KEY'], algorithm=ALGORITHM)
+    return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
 def token_required(f):
     """
@@ -67,7 +69,7 @@ def token_required(f):
         
         try:
             # Decode the token
-            payload = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=[ALGORITHM])
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
             customer_id = int(payload['sub'])  # Convert back to integer
         except JWTError as e:
             return jsonify({'message': f'Token is invalid: {str(e)}'}), 401

@@ -18,8 +18,8 @@ class DevelopmentConfig(Config):
 class ProductionConfig(Config):
     """Production configuration"""
     DEBUG = False
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'mysql+mysqlconnector://root:password@localhost/mechanicshopdata'
-    SQLALCHEMY_ENGINE_OPTIONS = {'connect_args': {'ssl_disabled': True}}
+    SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI')
+    CACHE_TYPE = 'SimpleCache'
 
 class TestingConfig(Config):
     """Testing configuration"""
