@@ -8,5 +8,6 @@ config_name = os.environ.get('FLASK_ENV', 'production')
 app = create_app(config_name)
 
 if __name__ == '__main__':
-    # Disable debug mode to avoid Python 3.14 debugger import issues on Windows
-    app.run(debug=False)
+    # Get port from environment variable (Render provides this)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
