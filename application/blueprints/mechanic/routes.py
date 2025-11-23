@@ -358,7 +358,9 @@ def delete_mechanic(mechanic_id):
             return {'error': 'Mechanic not found'}, 404
         
         # Check if mechanic is assigned to any service tickets
-        if mechanic.service_tickets.count() > 0:
+        from application.models import mechanic_service_ticket
+        ticket_count = db.session.query(mechanic_service_ticket).filter_by(mechanic_id=mechanic_id).count()
+        if ticket_count > 0:
             return {'error': 'Cannot delete mechanic who is assigned to service tickets'}, 409
         
         db.session.delete(mechanic)

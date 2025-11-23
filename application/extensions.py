@@ -38,7 +38,7 @@ def encode_token(customer_id):
     payload = {
         'exp': datetime.utcnow() + timedelta(hours=TOKEN_EXPIRATION_HOURS),
         'iat': datetime.utcnow(),
-        'sub': customer_id
+        'sub': str(customer_id)  # Convert to string for JWT
     }
     
     return jwt.encode(payload, current_app.config['SECRET_KEY'], algorithm=ALGORITHM)
@@ -68,7 +68,7 @@ def token_required(f):
         try:
             # Decode the token
             payload = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms=[ALGORITHM])
-            customer_id = payload['sub']
+            customer_id = int(payload['sub'])  # Convert back to integer
         except JWTError as e:
             return jsonify({'message': f'Token is invalid: {str(e)}'}), 401
         

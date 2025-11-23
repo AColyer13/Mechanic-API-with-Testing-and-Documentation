@@ -526,7 +526,8 @@ def get_tickets_by_mechanic(mechanic_id):
         if not mechanic:
             return {'error': 'Mechanic not found'}, 404
         
-        tickets = mechanic.service_tickets.all()
+        from application.models import ServiceTicket, mechanic_service_ticket
+        tickets = ServiceTicket.query.join(mechanic_service_ticket).filter(mechanic_service_ticket.c.mechanic_id == mechanic_id).all()
         return service_tickets_schema.dump(tickets), 200
         
     except Exception as e:

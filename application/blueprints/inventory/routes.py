@@ -164,7 +164,7 @@ def get_inventory_item(inventory_id):
         if not inventory_item:
             return {'error': 'Inventory part not found'}, 404
             
-        return inventory_schema.dump(inventory_item), 200
+        return inventory_simple_schema.dump(inventory_item), 200
     except Exception as e:
         return {'error': 'An error occurred while retrieving the inventory part'}, 500
 

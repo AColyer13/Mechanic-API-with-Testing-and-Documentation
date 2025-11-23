@@ -559,7 +559,9 @@ def delete_customer(authenticated_customer_id, customer_id):
             return {'error': 'Customer not found'}, 404
         
         # Check if customer has service tickets
-        if customer.service_tickets:
+        from application.models import ServiceTicket
+        ticket_count = ServiceTicket.query.filter_by(customer_id=customer_id).count()
+        if ticket_count > 0:
             return {'error': 'Cannot delete customer with active service tickets'}, 409
         
         db.session.delete(customer)
