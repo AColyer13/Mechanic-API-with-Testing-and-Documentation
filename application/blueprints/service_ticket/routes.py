@@ -457,44 +457,6 @@ def remove_mechanic(ticket_id, mechanic_id):
         return {'error': 'An error occurred while removing the mechanic'}, 500
 
 
-@service_ticket_bp.route('/customer/<int:customer_id>', methods=['GET'])
-def get_tickets_by_customer(customer_id):
-    """
-    Get all service tickets for a specific customer
-    ---
-    tags:
-      - Service Tickets
-    summary: Get tickets by customer
-    description: Retrieve all service tickets associated with a specific customer
-    parameters:
-      - in: path
-        name: customer_id
-        type: integer
-        required: true
-        description: The ID of the customer
-        example: 1
-    responses:
-      200:
-        description: List of customer's service tickets
-        schema:
-          type: array
-          items:
-            type: object
-      404:
-        description: Customer not found
-    """
-    try:
-        customer = Customer.query.get(customer_id)
-        if not customer:
-            return {'error': 'Customer not found'}, 404
-        
-        tickets = ServiceTicket.query.filter_by(customer_id=customer_id).all()
-        return service_tickets_schema.dump(tickets), 200
-        
-    except Exception as e:
-        return {'error': 'An error occurred while retrieving customer tickets'}, 500
-
-
 @service_ticket_bp.route('/mechanic/<int:mechanic_id>', methods=['GET'])
 def get_tickets_by_mechanic(mechanic_id):
     """
