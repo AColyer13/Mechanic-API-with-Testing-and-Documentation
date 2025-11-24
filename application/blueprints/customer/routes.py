@@ -493,6 +493,9 @@ def update_customer(authenticated_customer_id, customer_id):
         # Save changes
         db.session.commit()
         
+        # Clear the cached list of all customers
+        cache.delete('all_customers')
+        
         return customer_simple_schema.dump(customer_data), 200
         
     except ValidationError as err:
@@ -566,6 +569,9 @@ def delete_customer(authenticated_customer_id, customer_id):
         
         db.session.delete(customer)
         db.session.commit()
+        
+        # Clear the cached list of all customers
+        cache.delete('all_customers')
         
         return {'message': f'Customer {customer_id} deleted successfully'}, 200
         

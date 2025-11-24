@@ -306,6 +306,9 @@ def update_mechanic(mechanic_id):
         # Save changes
         db.session.commit()
         
+        # Clear the cached list of all mechanics
+        cache.delete('all_mechanics')
+        
         return mechanic_simple_schema.dump(mechanic_data), 200
         
     except ValidationError as err:
@@ -365,6 +368,9 @@ def delete_mechanic(mechanic_id):
         
         db.session.delete(mechanic)
         db.session.commit()
+        
+        # Clear the cached list of all mechanics
+        cache.delete('all_mechanics')
         
         return {'message': f'Mechanic {mechanic_id} deleted successfully'}, 200
         
