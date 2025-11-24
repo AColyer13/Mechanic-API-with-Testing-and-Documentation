@@ -166,7 +166,7 @@ Automatic cleanup of related data to maintain referential integrity:
 - Cleaner database
 - Prevents data inconsistencies
 
-## Using the Interactive Client (Optional)
+## Using the Interactive Client
 
 Test the API using the included Python CLI client configured for production.
 
