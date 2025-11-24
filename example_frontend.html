@@ -281,7 +281,7 @@
             resultDiv.innerHTML = '<div class="loading">Loading customers...</div>';
             
             try {
-                const response = await fetch(`${getApiUrl()}/customers`);
+                const response = await fetch(`${getApiUrl()}/customers/`);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -330,7 +330,7 @@
             }
             
             try {
-                const response = await fetch(`${getApiUrl()}/customers`, {
+                const response = await fetch(`${getApiUrl()}/customers/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -367,7 +367,7 @@
             resultDiv.innerHTML = '<div class="loading">Loading mechanics...</div>';
             
             try {
-                const response = await fetch(`${getApiUrl()}/mechanics`);
+                const response = await fetch(`${getApiUrl()}/mechanics/`);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -412,7 +412,7 @@
             }
             
             try {
-                const response = await fetch(`${getApiUrl()}/mechanics`, {
+                const response = await fetch(`${getApiUrl()}/mechanics/`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -451,7 +451,7 @@
             resultDiv.innerHTML = '<div class="loading">Loading inventory...</div>';
             
             try {
-                const response = await fetch(`${getApiUrl()}/inventory`);
+                const response = await fetch(`${getApiUrl()}/inventory/`);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -488,7 +488,7 @@
             resultDiv.innerHTML = '<div class="loading">Loading service tickets...</div>';
             
             try {
-                const response = await fetch(`${getApiUrl()}/service-tickets`);
+                const response = await fetch(`${getApiUrl()}/service-tickets/`);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
