@@ -744,7 +744,13 @@
             resultDiv.innerHTML = '<div class="loading">Loading customers...</div>';
             
             try {
-                const response = await fetch(`${getApiUrl()}/customers/`);
+                const response = await fetch(`${getApiUrl()}/customers/`, {
+                    cache: 'no-cache',
+                    headers: {
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    }
+                });
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -843,7 +849,13 @@
             resultDiv.innerHTML = '<div class="loading">Loading mechanics...</div>';
             
             try {
-                const response = await fetch(`${getApiUrl()}/mechanics/`);
+                const response = await fetch(`${getApiUrl()}/mechanics/`, {
+                    cache: 'no-cache',
+                    headers: {
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    }
+                });
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -938,7 +950,13 @@
             resultDiv.innerHTML = '<div class="loading">Loading inventory...</div>';
             
             try {
-                const response = await fetch(`${getApiUrl()}/inventory/`);
+                const response = await fetch(`${getApiUrl()}/inventory/`, {
+                    cache: 'no-cache',
+                    headers: {
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    }
+                });
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -958,7 +976,7 @@
                             <h3>${item.part_name}</h3>
                             <p>📦 Quantity: ${item.quantity}</p>
                             <p>💲 Price: $${item.price}</p>
-                            <p>🆔 Part ID: ${item.part_id}</p>
+                            <p>🆔 Part ID: ${item.id}</p>
                         </div>
                     `;
                 });
@@ -975,7 +993,13 @@
             resultDiv.innerHTML = '<div class="loading">Loading service tickets...</div>';
             
             try {
-                const response = await fetch(`${getApiUrl()}/service-tickets/`);
+                const response = await fetch(`${getApiUrl()}/service-tickets/`, {
+                    cache: 'no-cache',
+                    headers: {
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    }
+                });
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -1151,8 +1175,15 @@
                     }
                 });
                 
+                const data = await response.json();
+                
+                if (response.status === 409) {
+                    resultDiv.innerHTML = `<div class="error">❌ Cannot delete customer!<br>${data.error || 'Customer has associated service tickets.'}<br><br>💡 Tip: Delete the customer's service tickets first.</div>`;
+                    return;
+                }
+                
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    throw new Error(data.error || `HTTP error! status: ${response.status}`);
                 }
                 
                 resultDiv.innerHTML = `<div class="success">✅ Customer deleted successfully!</div>`;
@@ -1276,8 +1307,15 @@
                     method: 'DELETE'
                 });
                 
+                const data = await response.json();
+                
+                if (response.status === 409) {
+                    resultDiv.innerHTML = `<div class="error">❌ Cannot delete mechanic!<br>${data.error || 'Mechanic is assigned to service tickets.'}<br><br>💡 Tip: Remove the mechanic from all service tickets first.</div>`;
+                    return;
+                }
+                
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    throw new Error(data.error || `HTTP error! status: ${response.status}`);
                 }
                 
                 resultDiv.innerHTML = `<div class="success">✅ Mechanic deleted successfully!</div>`;
@@ -1432,8 +1470,15 @@
                     method: 'DELETE'
                 });
                 
+                const data = await response.json();
+                
+                if (response.status === 409) {
+                    resultDiv.innerHTML = `<div class="error">❌ Cannot delete inventory item!<br>${data.error || 'Item is associated with service tickets.'}<br><br>💡 Tip: Remove this part from service tickets first.</div>`;
+                    return;
+                }
+                
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    throw new Error(data.error || `HTTP error! status: ${response.status}`);
                 }
                 
                 resultDiv.innerHTML = `<div class="success">✅ Inventory item deleted!</div>`;
@@ -1623,8 +1668,10 @@
                     method: 'DELETE'
                 });
                 
+                const data = await response.json();
+                
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    throw new Error(data.error || `HTTP error! status: ${response.status}`);
                 }
                 
                 resultDiv.innerHTML = `<div class="success">✅ Service ticket deleted!</div>`;
