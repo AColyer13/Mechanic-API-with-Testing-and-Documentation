@@ -172,45 +172,15 @@ Cache auto-clears on create/update/delete operations for data consistency.
 
 The local development API will be available at `http://127.0.0.1:5000`
 
-## Using the Interactive Client
+## Using the Interactive Client (Optional)
 
-The project includes an interactive command-line client configured for the **live production API**:
+Test the API using the included Python CLI client configured for production:
 
 ```powershell
 .venv\Scripts\python.exe client.py
 ```
 
-The client provides:
-- **Menu-driven interface** for all API operations
-- **Automated test suite** to create sample data
-- **Input validation** and error handling
-- **Formatted JSON responses**
-
-### Client Features
-- Create, read, update, and delete customers, mechanics, and service tickets
-- Assign/remove mechanics from service tickets
-- Query tickets by customer or mechanic
-- Run complete automated test suite (creates sample data and tests all endpoints)
-
-## Resolving Common Issues
-
-### "pip is not recognized" Error
-If you see this error, use the full path to the Python executable:
-```powershell
-.venv\Scripts\python.exe -m pip install [package-name]
-```
-
-### PowerShell Execution Policy
-If you can't activate the virtual environment due to execution policy, use the Python executable directly:
-```powershell
-.venv\Scripts\python.exe flask_app.py
-```
-
-### Running Tests
-To verify your installation, run the automated test suite:
-```powershell
-.venv\Scripts\python.exe -m unittest discover tests
-```
+Features: Menu-driven interface, automated test suite, input validation, and formatted responses.
 
 ## Project Structure
 
@@ -440,86 +410,31 @@ curl -X PUT https://mechanic-api-copy-with-testing-and.onrender.com/service-tick
 
 ## Testing with Postman
 
-### Importing the Collection
-1. Open Postman
-2. Click **Import** → Select `Mechanic API.postman_collection.json`
-3. Collection includes 40+ organized requests
+Import `Mechanic API.postman_collection.json` for 40+ pre-configured requests organized by endpoint.
 
-### Collection Structure
-
-**1. API Root**
-- Get API welcome message
-
-**2. Customers** (Full CRUD)
-- Create, Read, Update, Delete operations
-
-**3. Mechanics** (Full CRUD)
-- Create, Read, Update, Delete operations
-
-**4. Service Tickets** (Full CRUD + Assignment)
-- CRUD operations
-- Assign/Remove Mechanic
-- Add Part to Ticket
-- Query by Customer/Mechanic
-
-**5. Authentication** ⭐
-- Customer Login (auto-saves token to environment)
-- Get My Tickets (requires token)
-- Update Customer (requires token)
-- Delete Customer (requires token)
-
-**6. Inventory** (Full CRUD)
-- Create, Read, Update, Delete operations
-- Rate limiting and caching enabled
-
-### Testing Features
-- **Auto Token Management**: Login request saves JWT to `{{auth_token}}`
-- **Sample Data**: Pre-filled request bodies
-- **Documentation**: Each request includes description
-- **Variables**: Use `{{baseUrl}}` for easy configuration
+**Features:**
+- Auto token management (login saves JWT to `{{auth_token}}`)
+- Sample data pre-filled in request bodies
+- Use `{{baseUrl}}` variable for easy environment switching
 
 ## Automated Unit Testing
 
-### Test Suite Overview
+Comprehensive test suite with **90+ test cases** covering all endpoints, authentication, validation, and error handling.
 
-The project includes a **comprehensive automated test suite** with **90+ test cases** covering all API endpoints, authentication, validation, and error handling.
+**Test Modules:**
+- `test_customers.py` - 18 tests | `test_mechanics.py` - 15 tests
+- `test_inventory.py` - 19 tests | `test_service_tickets.py` - 25 tests
 
-### Test Structure
-
-**Base Test Case** (`tests/base_test.py`):
-- Foundation class for all test modules
-- Automatic test database setup
-- In-memory SQLite database for fast execution
-
-**Test Modules**:
-- `test_customers.py` - 18 test cases 
-- `test_mechanics.py` - 15 test cases
-- `test_inventory.py` - 19 test cases 
-- `test_service_tickets.py` - 25 test cases 
-
-#### Run Specific Test File
+**Run Tests:**
 ```powershell
+# All tests
+.venv\Scripts\python.exe -m unittest discover tests
+
+# Specific module
 .venv\Scripts\python.exe -m unittest tests.test_customers
-.venv\Scripts\python.exe -m unittest tests.test_mechanics
-.venv\Scripts\python.exe -m unittest tests.test_inventory
-.venv\Scripts\python.exe -m unittest tests.test_service_tickets
 ```
 
-### Test Features
-
-- **Database Check**: Each test runs in a clean environment
-- **Authentication Testing**: JWT token generation and validation
-- **Authorization Testing**: Customer-specific access control
-- **Validation Testing**: Required fields, data types, constraints
-- **Relationship Testing**: Many-to-many relationships, cascade protections
-- **Edge Case Coverage**: Empty values, boundary conditions, duplicates
-- **Error Response Validation**: Proper HTTP status codes and error messages
-
-### Test Dependencies
-
-Required packages (already in `requirements.txt`):
-- `unittest` - Built-in Python test framework
-- `flask-testing` - Flask test utilities
+**Coverage:** Database isolation, JWT authentication/authorization, input validation, relationship testing, edge cases, and error responses.
 
 ## Development Notes
 
