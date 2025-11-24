@@ -33,20 +33,7 @@
             margin-bottom: 10px;
         }
         
-        .api-url {
-            text-align: center;
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 14px;
-        }
-        
-        .api-url input {
-            width: 400px;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            margin-left: 10px;
-        }
+
         
         .section {
             margin-bottom: 30px;
@@ -180,11 +167,6 @@
 <body>
     <div class="container">
         <h1>🔧 Mechanic Shop API Demo</h1>
-        <div class="api-url">
-            <label for="apiUrl">API URL:</label>
-            <input type="text" id="apiUrl" value="https://mechanic-api-copy-with-testing-and.onrender.com" 
-                   placeholder="https://mechanic-api-copy-with-testing-and.onrender.com">
-        </div>
         
         <div class="tabs">
             <button class="tab active" onclick="switchTab('customers')">Customers</button>
@@ -271,9 +253,11 @@
     </div>
 
     <script>
-        // Get the API base URL
+        // API base URL (hardcoded)
+        const API_URL = 'https://mechanic-api-copy-with-testing-and.onrender.com';
+        
         function getApiUrl() {
-            return document.getElementById('apiUrl').value;
+            return API_URL;
         }
 
         // Tab switching
