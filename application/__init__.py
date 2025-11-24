@@ -25,14 +25,13 @@ def create_app(config_name='development'):
     # Load configuration
     app.config.from_object(config[config_name])
     
-    # Enable CORS for all routes
-    CORS(app, resources={
-        r"/*": {
-            "origins": "*",  # Change to your specific domain in production
-            "methods": ["GET", "POST", "PUT", "DELETE", "PATCH"],
-            "allow_headers": ["Content-Type", "Authorization"]
-        }
-    })
+    # Enable CORS for all routes with comprehensive settings
+    CORS(app, 
+         resources={r"/*": {"origins": "*"}},
+         supports_credentials=True,
+         allow_headers=["Content-Type", "Authorization"],
+         methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
+    )
     
     # Add caching configuration
     app.config['CACHE_TYPE'] = 'SimpleCache'

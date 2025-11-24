@@ -308,7 +308,13 @@
                 
                 resultDiv.innerHTML = html;
             } catch (error) {
-                resultDiv.innerHTML = `<div class="error">Error: ${error.message}<br>Make sure your API URL is correct and CORS is enabled!</div>`;
+                console.error('Fetch error:', error);
+                resultDiv.innerHTML = `<div class="error">
+                    <strong>Error:</strong> ${error.message}<br>
+                    <strong>API URL:</strong> ${getApiUrl()}/customers<br>
+                    <strong>Tip:</strong> Check if your Render backend is running and the URL is correct.<br>
+                    Open browser console (F12) for more details.
+                </div>`;
             }
         }
 
