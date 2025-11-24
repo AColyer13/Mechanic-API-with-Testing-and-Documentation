@@ -142,6 +142,30 @@ Performance optimization with automatic invalidation:
 
 Cache auto-clears on create/update/delete operations for data consistency.
 
+### Cascade Delete (Data Integrity)
+Automatic cleanup of related data to maintain referential integrity:
+
+**Customer Deletion:**
+- When a customer is deleted, all their service tickets are automatically deleted
+- Prevents orphaned service tickets in the database
+- Implemented with SQLAlchemy `cascade='all, delete-orphan'`
+
+**Service Ticket Deletion:**
+- Automatically removes all mechanic assignments
+- Automatically removes all inventory part associations
+- Database-level cascade ensures clean deletion even if app logic fails
+
+**Mechanic/Inventory Deletion:**
+- Only removes associations with service tickets
+- Service tickets remain intact (multiple mechanics can work on tickets)
+- Association table entries cleaned up automatically with `ondelete='CASCADE'`
+
+**Benefits:**
+- No orphaned records
+- Referential integrity maintained
+- Cleaner database
+- Prevents data inconsistencies
+
 ## Local Development Setup (Optional)
 
 **Note**: The API is already live at the URL above. This section is only needed if you want to run a local development copy.
