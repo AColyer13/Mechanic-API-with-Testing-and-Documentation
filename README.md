@@ -4,28 +4,53 @@ A comprehensive RESTful API for managing a mechanic shop built with Flask using 
 
 ## 🚀 Live Deployment
 
-**Production URL**: [https://mechanic-api-copy-with-testing-and.onrender.com](https://mechanic-api-copy-with-testing-and.onrender.com)
+**Backend API**: [https://mechanic-api-copy-with-testing-and.onrender.com](https://mechanic-api-copy-with-testing-and.onrender.com)
+
+**Frontend Web App**: [https://acolyer13.github.io/Mechanic-Website/](https://acolyer13.github.io/Mechanic-Website/)
 
 ### Quick Start - Using the Live API
 
 The API is deployed and ready to use! You have three options:
 
-#### 1️⃣ Interactive API Documentation (Recommended)
+#### 1️⃣ Interactive Web Interface (Recommended for Users)
+Visit the **live web application** to manage your mechanic shop:
+- **URL**: [https://acolyer13.github.io/Mechanic-Website/](https://acolyer13.github.io/Mechanic-Website/)
+- User-friendly interface for all operations
+- Manage customers, mechanics, inventory, and service tickets
+- JWT authentication with customer login
+- No coding or tools required!
+
+#### 2️⃣ Interactive API Documentation (Recommended for Developers)
 Visit the **Swagger UI** to test all endpoints directly in your browser:
 - **URL**: [https://mechanic-api-copy-with-testing-and.onrender.com/api/docs](https://mechanic-api-copy-with-testing-and.onrender.com/api/docs)
 - See all available endpoints
 - Test API calls with interactive forms
 - View request/response formats
-- No coding or tools required!
+- Perfect for API development and testing
 
-#### 2️⃣ Direct API Endpoints
+#### 2️⃣ Interactive API Documentation (Recommended for Developers)
+Visit the **Swagger UI** to test all endpoints directly in your browser:
+- **URL**: [https://mechanic-api-copy-with-testing-and.onrender.com/api/docs](https://mechanic-api-copy-with-testing-and.onrender.com/api/docs)
+- See all available endpoints
+- Test API calls with interactive forms
+- View request/response formats
+- Perfect for API development and testing
+
+#### 3️⃣ Direct API Endpoints
 Access the live API programmatically:
 - **Customers**: `https://mechanic-api-copy-with-testing-and.onrender.com/customers`
 - **Mechanics**: `https://mechanic-api-copy-with-testing-and.onrender.com/mechanics`
 - **Inventory**: `https://mechanic-api-copy-with-testing-and.onrender.com/inventory`
 - **Service Tickets**: `https://mechanic-api-copy-with-testing-and.onrender.com/service-tickets`
 
-#### 3️⃣ Use API Testing Tools
+#### 3️⃣ Direct API Endpoints
+Access the live API programmatically:
+- **Customers**: `https://mechanic-api-copy-with-testing-and.onrender.com/customers`
+- **Mechanics**: `https://mechanic-api-copy-with-testing-and.onrender.com/mechanics`
+- **Inventory**: `https://mechanic-api-copy-with-testing-and.onrender.com/inventory`
+- **Service Tickets**: `https://mechanic-api-copy-with-testing-and.onrender.com/service-tickets`
+
+#### 4️⃣ Use API Testing Tools
 - **Postman**: Import `Mechanic API.postman_collection.json` and use the live base URL
 - **cURL**: Make requests from the command line (examples below)
 - **Python CLI Client**: Run `client.py` for interactive testing
