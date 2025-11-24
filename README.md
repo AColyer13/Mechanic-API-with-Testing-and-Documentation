@@ -488,15 +488,14 @@ The project includes a **comprehensive automated test suite** with **90+ test ca
 
 **Base Test Case** (`tests/base_test.py`):
 - Foundation class for all test modules
-- Automatic test database setup/teardown
+- Automatic test database setup
 - In-memory SQLite database for fast execution
-- Helper methods for authentication headers
 
 **Test Modules**:
-- `test_customers.py` - 18 test cases (8 positive, 10 negative)
-- `test_mechanics.py` - 15 test cases (6 positive, 9 negative)
-- `test_inventory.py` - 19 test cases (7 positive, 12 negative)
-- `test_service_tickets.py` - 25 test cases (12 positive, 13 negative)
+- `test_customers.py` - 18 test cases 
+- `test_mechanics.py` - 15 test cases
+- `test_inventory.py` - 19 test cases 
+- `test_service_tickets.py` - 25 test cases 
 
 #### Run Specific Test File
 ```powershell
@@ -506,25 +505,9 @@ The project includes a **comprehensive automated test suite** with **90+ test ca
 .venv\Scripts\python.exe -m unittest tests.test_service_tickets
 ```
 
-#### Run with Verbose Output
-```powershell
-.venv\Scripts\python.exe -m unittest discover tests -v
-```
-
-#### Run Specific Test Class
-```powershell
-.venv\Scripts\python.exe -m unittest tests.test_customers.TestCustomerEndpoints
-```
-
-#### Run Specific Test Method
-```powershell
-.venv\Scripts\python.exe -m unittest tests.test_customers.TestCustomerEndpoints.test_customer_login_success -v
-```
-
 ### Test Features
 
-- **Database Isolation**: Each test runs in a clean environment
-- **Helper Methods**: Reusable test data creation functions
+- **Database Check**: Each test runs in a clean environment
 - **Authentication Testing**: JWT token generation and validation
 - **Authorization Testing**: Customer-specific access control
 - **Validation Testing**: Required fields, data types, constraints
