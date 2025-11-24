@@ -186,13 +186,33 @@ The local development API will be available at `http://127.0.0.1:5000`
 
 ## Using the Interactive Client (Optional)
 
-Test the API using the included Python CLI client configured for production:
+Test the API using the included Python CLI client configured for production.
+
+### Client Setup
+
+The client requires the `requests` library. Install it using:
 
 ```powershell
+# Option 1: Install globally (simplest - run client without virtual environment)
+python -m pip install requests
+
+# Option 2: Use virtual environment (if running local Flask development)
+.venv\Scripts\python.exe -m pip install -r requirements.txt
+```
+
+### Running the Client
+
+```powershell
+# If you installed requests globally
+python client.py
+
+# If using virtual environment
 .venv\Scripts\python.exe client.py
 ```
 
-Features: Menu-driven interface, automated test suite, input validation, and formatted responses.
+**Features**: Menu-driven interface, automated test suite, JWT authentication, input validation, and formatted responses.
+
+**Note**: The client is pre-configured to connect to the production API at `https://mechanic-api-copy-with-testing-and.onrender.com`. No local Flask server needed!
 
 ## Project Structure
 

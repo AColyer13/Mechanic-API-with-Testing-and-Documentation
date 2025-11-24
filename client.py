@@ -779,81 +779,34 @@ def main():
     client = MechanicShopAPIClient()
     
     print("🔧 Starting Mechanic Shop API Client...")
-    print("🔍 Checking for Flask API...")
+    print(f"🔍 Connecting to API at: {BASE_URL}")
     
-    # Try multiple possible URLs where Flask might be running
-    possible_urls = [
-        "http://127.0.0.1:5000",
-        "http://localhost:5000", 
-        "http://0.0.0.0:5000",
-        "http://127.0.0.1:8000",
-        "http://localhost:8000"
-    ]
-    
-    connected = False
-    working_url = None
-    
-    for url in possible_urls:
-        try:
-            print(f"🔄 Trying {url}...")
-            response = requests.get(f"{url}/", timeout=5)
-            if response.status_code == 200:
-                print(f"✅ Connected to API successfully at {url}!")
-                try:
-                    data = response.json()
-                    print(f"📋 API Message: {data.get('message', 'N/A')}")
-                    print(f"🔗 Available endpoints: {data.get('endpoints', {})}")
-                except json.JSONDecodeError:
-                    print("⚠️ API responded but didn't return JSON")
-                connected = True
-                working_url = url
-                # Update the client's base URL
-                client.base_url = url
-                break
-            else:
-                print(f"❌ Got response code {response.status_code} from {url}")
-        except requests.exceptions.ConnectionError:
-            print(f"❌ Connection refused at {url}")
-        except requests.exceptions.Timeout:
-            print(f"⏱️ Timeout connecting to {url}")
-        except Exception as e:
-            print(f"❌ Error with {url}: {str(e)[:50]}...")
-    
-    if not connected:
-        print("\n" + "="*70)
-        print("❌ FLASK API NOT RUNNING")
-        print("="*70)
-        print("📝 To start your Flask API:")
-        print("   1. Open a new terminal/command prompt")
-        print("   2. Navigate to your project directory:")
-        print("      cd \"c:\\Users\\adamc\\OneDrive\\Coding Temple\\Mechanic API\"")
-        print("   3. Start the Flask app:")
-        print("      .venv\\Scripts\\python.exe app.py")
-        print("   4. Wait for message: '* Running on http://127.0.0.1:5000'")
-        print("   5. Then run this client again")
-        print("\n🔧 If you get database errors when starting Flask:")
-        print("   • Make sure MySQL is running (I can see it is from your image)")
-        print("   • Create the database if it doesn't exist:")
-        print("     mysql -u root -p")
-        print("     CREATE DATABASE mechanicshopdata;")
-        print("     exit;")
-        print("\n⚠️ Common issues:")
-        print("   • Port 5000 might be in use - Flask will show alternative port")
-        print("   • Virtual environment might not be activated")
-        print("   • Missing dependencies - run: .venv\\Scripts\\python.exe -m pip install -r requirements.txt")
-        print("="*70)
-        
-        choice = safe_input("\n🤔 Continue with client anyway? (y/N): ")
-        if choice is None:
+    # Check if the configured API is accessible
+    try:
+        response = requests.get(f"{BASE_URL}/", timeout=10)
+        if response.status_code == 200:
+            print(f"✅ Connected to API successfully!")
+            try:
+                data = response.json()
+                print(f"📋 API Message: {data.get('message', 'N/A')}")
+            except json.JSONDecodeError:
+                print("⚠️ API responded but didn't return JSON")
+        else:
+            print(f"⚠️ API responded with status code: {response.status_code}")
+    except requests.exceptions.ConnectionError:
+        print(f"❌ Could not connect to API at {BASE_URL}")
+        print("⚠️ Make sure the API is running and the URL is correct")
+        choice = safe_input("\n🤔 Continue anyway? (y/N): ")
+        if choice is None or choice.strip().lower() != 'y':
             print("\n👋 Exiting...")
             return
-        choice = choice.strip().lower()
-            
-        if choice != 'y':
-            print("👋 Exiting... Start Flask API first, then run client again.")
-            return
-    else:
-        print(f"\n🎉 Ready to use API at: {working_url}")
+    except requests.exceptions.Timeout:
+        print(f"⏱️ Timeout connecting to {BASE_URL}")
+        print("⚠️ The API might be slow to respond")
+    except Exception as e:
+        print(f"❌ Error connecting to API: {str(e)[:100]}...")
+    
+    print(f"\n🎉 Ready to use API at: {BASE_URL}")
 
     # Delay and flush to ensure stdin is ready (Windows terminal issue)
     time.sleep(0.5)
