@@ -59,7 +59,7 @@ Access the live API programmatically:
 - **Push to main/master branch**: Full pipeline (build → test → deploy)
 - **Pull requests**: Build and test only (no deployment)
 
-**Repository**: [github.com/AColyer13/Mechanic-API---Copy-with-Testing-and-Documentation]
+**Repository**: [github.com/AColyer13/Mechanic-API---Copy-with-Testing-and-Documentation](github.com/AColyer13/Mechanic-API---Copy-with-Testing-and-Documentation)
 
 ### Deployment Details
 - **Platform**: Render (Cloud hosting)
@@ -67,25 +67,6 @@ Access the live API programmatically:
 - **Database**: MySQL (persistent storage)
 - **Always-On**: API is available 24/7
 - **HTTPS**: Secure SSL encryption enabled
-
-**Example Request:**
-```bash
-curl https://mechanic-api-copy-with-testing-and.onrender.com/customers
-```
-
-**Example Response:**
-```json
-{
-  "documentation": "/api/docs",
-  "endpoints": {
-    "customers": "/customers",
-    "inventory": "/inventory",
-    "mechanics": "/mechanics",
-    "service_tickets": "/service-tickets"
-  },
-  "message": "Welcome to Mechanic Shop API"
-}
-```
 
 ## Features
 
