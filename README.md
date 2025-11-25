@@ -195,6 +195,9 @@ project-root/
 ├── Mechanic API.postman_collection.json
 ├── config.py                    # App config
 ├── requirements.txt             # Python dependencies
+├── .github/
+│   └── workflows/
+│       └── ci.yaml              # GitHub Actions CI/CD pipeline
 └── README.md
 ```
 
