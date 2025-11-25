@@ -81,9 +81,26 @@ Interactive documentation with “Try it out” for every endpoint.
 | PUT    | `/customers/<id>`       | Update own account              | Yes  |
 | DELETE | `/customers/<id>`       | Delete own account              | Yes  |
 
-### Mechanics (`/mechanics`) – Standard CRUD (cached list, 10/min on POST)
 
-### Inventory (`/inventory`) – Standard CRUD (cached list, 20/min on POST)
+### Mechanics (`/mechanics`)
+
+| Method | Endpoint                | Description              | Auth |
+|--------|-------------------------|--------------------------|------|
+| POST   | `/mechanics/`           | Create mechanic          | No   |
+| GET    | `/mechanics/`           | List all (cached)        | No   |
+| GET    | `/mechanics/<id>`       | Get one                  | No   |
+| PUT    | `/mechanics/<id>`       | Update mechanic          | No   |
+| DELETE | `/mechanics/<id>`       | Delete mechanic          | No   |
+
+### Inventory (`/inventory`)
+
+| Method | Endpoint                | Description              | Auth |
+|--------|-------------------------|--------------------------|------|
+| POST   | `/inventory/`           | Create inventory item    | No   |
+| GET    | `/inventory/`           | List all (cached)        | No   |
+| GET    | `/inventory/<id>`       | Get one                  | No   |
+| PUT    | `/inventory/<id>`       | Update inventory item    | No   |
+| DELETE | `/inventory/<id>`       | Delete inventory item    | No   |
 
 ### Service Tickets (`/service-tickets`)
 
@@ -97,7 +114,6 @@ Interactive documentation with “Try it out” for every endpoint.
 | PUT    | `/service-tickets/<id>/assign-mechanic/<mid>`     | Assign mechanic                 |
 | PUT    | `/service-tickets/<id>/remove-mechanic/<mid>`     | Remove mechanic                 |
 | PUT    | `/service-tickets/<id>/add-part/<pid>`            | Add part                        |
-<!-- Removed for security: GET    | `/service-tickets/customer/<cid>`                 | Customer's tickets              |-->
 | GET    | `/service-tickets/mechanic/<mid>`                 | Mechanic's tickets              |
 
 ---
