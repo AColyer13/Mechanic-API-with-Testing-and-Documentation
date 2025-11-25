@@ -28,21 +28,6 @@ Visit the **Swagger UI** to test all endpoints directly in your browser:
 - View request/response formats
 - Perfect for API development and testing
 
-#### 2️⃣ Interactive API Documentation (Recommended for Developers)
-Visit the **Swagger UI** to test all endpoints directly in your browser:
-- **URL**: [https://mechanic-api-copy-with-testing-and.onrender.com/api/docs](https://mechanic-api-copy-with-testing-and.onrender.com/api/docs)
-- See all available endpoints
-- Test API calls with interactive forms
-- View request/response formats
-- Perfect for API development and testing
-
-#### 3️⃣ Direct API Endpoints
-Access the live API programmatically:
-- **Customers**: `https://mechanic-api-copy-with-testing-and.onrender.com/customers`
-- **Mechanics**: `https://mechanic-api-copy-with-testing-and.onrender.com/mechanics`
-- **Inventory**: `https://mechanic-api-copy-with-testing-and.onrender.com/inventory`
-- **Service Tickets**: `https://mechanic-api-copy-with-testing-and.onrender.com/service-tickets`
-
 #### 3️⃣ Direct API Endpoints
 Access the live API programmatically:
 - **Customers**: `https://mechanic-api-copy-with-testing-and.onrender.com/customers`
