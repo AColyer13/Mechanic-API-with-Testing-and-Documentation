@@ -207,12 +207,6 @@ project-root/
 - **Hosting:** Render (24/7, HTTPS, persistent MySQL)
 - **Auto‑deployment:** on push to main
 
----
-
-Enjoy!
-
-Questions or issues → open a GitHub issue.
-
 ## Authentication
 
 All endpoints marked with **Auth: Yes** require a valid JWT token, which you can obtain by logging in via `POST /customers/login`. Pass the token in the `Authorization: Bearer <token>` header.
