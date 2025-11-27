@@ -553,3 +553,62 @@ def add_part_to_ticket(ticket_id, inventory_id):
     except Exception as e:
         db.session.rollback()
         return {'error': 'An error occurred while adding the part'}, 500
+
+
+@service_ticket_bp.route('/<int:ticket_id>/remove-part/<int:inventory_id>', methods=['PUT'])
+def remove_part_from_ticket(ticket_id, inventory_id):
+    """
+    Remove a single inventory part from an existing service ticket
+    ---
+    tags:
+      - Service Tickets
+    summary: Remove part from service ticket
+    description: Remove an inventory part from a service ticket
+    parameters:
+      - in: path
+        name: ticket_id
+        type: integer
+        required: true
+        description: The ID of the service ticket
+        example: 1
+      - in: path
+        name: inventory_id
+        type: integer
+        required: true
+        description: The ID of the inventory part to remove
+        example: 1
+    responses:
+      200:
+        description: Part removed successfully
+        schema:
+          properties:
+            message:
+              type: string
+              example: Part 1 removed from ticket 1
+      404:
+        description: Service ticket or inventory part not found
+      409:
+        description: Part is not added to this ticket
+    """
+    try:
+        ticket = ServiceTicket.query.get(ticket_id)
+        if not ticket:
+            return {'error': 'Service ticket not found'}, 404
+        
+        inventory_part = Inventory.query.get(inventory_id)
+        if not inventory_part:
+            return {'error': 'Inventory part not found'}, 404
+        
+        # Check if part is added to the ticket
+        if inventory_part not in ticket.inventory_parts:
+            return {'error': 'Part is not added to this ticket'}, 409
+        
+        # Remove part from ticket
+        ticket.inventory_parts.remove(inventory_part)
+        db.session.commit()
+        
+        return {'message': f'Part {inventory_id} removed from ticket {ticket_id}'}, 200
+        
+    except Exception as e:
+        db.session.rollback()
+        return {'error': 'An error occurred while removing the part'}, 500

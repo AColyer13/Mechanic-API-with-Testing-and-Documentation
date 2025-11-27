@@ -449,6 +449,21 @@
 						},
 						"description": "Add an inventory part to a service ticket (replace first 1 with ticket ID, second 1 with inventory part ID)"
 					}
+				},
+				{
+					"name": "Remove Part from Ticket",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"url": {
+							"raw": "http://127.0.0.1:5000/service-tickets/1/remove-part/1",
+							"protocol": "http",
+							"host": ["127", "0", "0", "1"],
+							"port": "5000",
+							"path": ["service-tickets", "1", "remove-part", "1"]
+						},
+						"description": "Remove an inventory part from a service ticket (replace first 1 with ticket ID, second 1 with inventory part ID)"
+					}
 				}
 			],
 			"description": "Service ticket management endpoints with mechanic assignment capabilities"
