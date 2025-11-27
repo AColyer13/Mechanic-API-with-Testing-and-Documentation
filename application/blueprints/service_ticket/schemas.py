@@ -5,6 +5,7 @@ from marshmallow import fields, validate, ValidationError, pre_load, post_load
 from datetime import datetime
 from application.models import ServiceTicket
 from application.extensions import db, ma
+from application.blueprints.inventory.schemas import InventorySchema
 
 
 class ServiceTicketSchema(SQLAlchemyAutoSchema):
@@ -35,6 +36,7 @@ class ServiceTicketSchema(SQLAlchemyAutoSchema):
     # Nested relationships
     customer = fields.Nested('CustomerSchema', dump_only=True, exclude=('service_tickets',))
     mechanics = fields.Nested('MechanicSchema', many=True, dump_only=True, exclude=('service_tickets',))
+    inventory_parts = fields.Nested('InventorySchema', many=True, dump_only=True, exclude=('service_tickets',))
     
     @pre_load
     def strip_whitespace(self, data, **kwargs):

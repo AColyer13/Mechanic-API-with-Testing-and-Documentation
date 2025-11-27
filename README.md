@@ -117,8 +117,8 @@ Interactive documentation with “Try it out” for every endpoint.
 | Method | Endpoint                                          | Description                     |
 |--------|---------------------------------------------------|---------------------------------|
 | POST   | `/service-tickets/`                               | Create ticket                   |
-| GET    | `/service-tickets/`                               | List all                        |
-| GET    | `/service-tickets/<id>`                           | Get one                         |
+| GET    | `/service-tickets/`                               | List all with customer, mechanic, and inventory parts info |
+| GET    | `/service-tickets/<id>`                           | Get one with customer, mechanic, and inventory parts info |
 | PUT    | `/service-tickets/<id>`                           | Update                          |
 | DELETE | `/service-tickets/<id>`                           | Delete                          |
 | PUT    | `/service-tickets/<id>/assign-mechanic/<mid>`     | Assign mechanic                 |

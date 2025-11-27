@@ -318,7 +318,7 @@
 							"port": "5000",
 							"path": ["service-tickets", ""]
 						},
-						"description": "Retrieve all service tickets with customer and mechanic information"
+						"description": "Retrieve all service tickets with customer, mechanic, and inventory parts information"
 					}
 				},
 				{
@@ -333,7 +333,7 @@
 							"port": "5000",
 							"path": ["service-tickets", "1"]
 						},
-						"description": "Get a specific service ticket by ID (replace 1 with actual ticket ID)"
+						"description": "Get a specific service ticket by ID with customer, mechanic, and inventory parts information (replace 1 with actual ticket ID)"
 					}
 				},
 				{
