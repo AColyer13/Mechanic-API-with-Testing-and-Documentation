@@ -386,7 +386,6 @@ const AccountSettings = () => {
             </h2>
 
             <div className="bg-red-50 border border-red-200 rounded p-4">
-              <h3 className="text-lg font-semibold text-red-800 mb-2">Delete Account</h3>
               <p className="text-red-700 mb-4">
                 Once deleted, this action cannot be undone. All data, including service tickets and personal information,
                 will be permanently removed from our servers.
