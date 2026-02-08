@@ -39,7 +39,9 @@ const Register = () => {
     
     if (result.success) {
       if (result.requiresEmailVerification) {
-        setSuccessMessage('Registration successful! Please check your email to verify your account before logging in.');
+        setSuccessMessage('Registration successful! Please verify your email to continue.');
+        // Auto-redirect to verify email after showing message
+        setTimeout(() => navigate('/verify-email'), 2000);
       } else {
         navigate('/dashboard');
       }
