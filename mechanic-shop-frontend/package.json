@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:e2e": "cd e2e-tests && npm test",
+    "test:e2e:ui": "cd e2e-tests && npm run test:ui",
+    "test:e2e:headed": "cd e2e-tests && npm run test:headed"
   },
   "dependencies": {
     "axios": "^1.13.4",

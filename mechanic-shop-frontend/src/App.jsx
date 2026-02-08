@@ -22,9 +22,9 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="app">
+        <div className="min-h-screen flex flex-col bg-gray-50">
           <Navbar />
-          <main className="main-content">
+          <main className="flex-1">
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
