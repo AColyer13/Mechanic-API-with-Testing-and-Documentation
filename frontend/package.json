@@ -1,0 +1,20 @@
+{
+  "name": "mechanic-shop-e2e-tests",
+  "version": "1.0.0",
+  "description": "Playwright E2E and visual tests for Mechanic Shop frontend",
+  "type": "module",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:chromium": "playwright test --project=chromium",
+    "test:debug": "playwright test --debug",
+    "report": "playwright show-report"
+  },
+  "keywords": ["playwright", "e2e", "visual-testing"],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.58.2"
+  }
+}

@@ -1,16 +1,135 @@
-# React + Vite
+# Mechanic Shop Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + Vite frontend for the Mechanic Shop API.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- 🔐 Customer authentication (login/register)
+- 📊 Dashboard with service ticket statistics
+- 🎫 View and manage service tickets
+- ✨ Create new service tickets
+- 🎨 Modern, responsive UI
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- React 18
+- Vite
+- React Router DOM
+- Axios
+- CSS3
 
-## Expanding the ESLint configuration
+## Getting Started
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Prerequisites
+
+- Node.js 18+ installed
+- Firebase Functions emulator running (backend API)
+
+### Installation
+
+1. Install dependencies:
+```bash
+npm install
+```
+
+2. Configure API endpoint (optional):
+```bash
+cp .env.example .env
+# Edit .env to set VITE_API_URL if needed
+```
+
+3. Start development server:
+```bash
+npm run dev
+```
+
+The app will be available at `http://localhost:5173`
+
+### Build for Production
+
+```bash
+npm run build
+```
+
+## API Configuration
+
+The frontend connects to the Firebase Functions API. Default endpoint:
+```
+http://localhost:5001/mechanic-shop-api-functions/us-central1/api
+```
+
+To change the API endpoint, set the `VITE_API_URL` environment variable in `.env`
+
+## Project Structure
+
+```
+src/
+├── components/       # Reusable components
+│   ├── Navbar.jsx
+│   └── ProtectedRoute.jsx
+├── context/         # React Context (Auth)
+│   └── AuthContext.jsx
+├── pages/           # Page components
+│   ├── Home.jsx
+│   ├── Login.jsx
+│   ├── Register.jsx
+│   ├── Dashboard.jsx
+│   ├── Tickets.jsx
+│   └── CreateTicket.jsx
+├── services/        # API service layer
+│   └── api.service.js
+├── config/          # Configuration
+│   └── api.js
+├── App.jsx          # Main app component
+└── main.jsx         # Entry point
+```
+
+## Available Routes
+
+- `/` - Home page
+- `/login` - Customer login
+- `/register` - Customer registration
+- `/dashboard` - Customer dashboard (protected)
+- `/tickets` - View all tickets (protected)
+- `/create-ticket` - Create new ticket (protected)
+
+## Authentication
+
+The app uses JWT token-based authentication. Tokens are stored in localStorage and automatically included in API requests.
+
+## Development
+
+### Test Credentials
+
+Use the seeded test account:
+- Email: `john.doe@email.com`
+- Password: `password123`
+
+### Hot Reload
+
+Vite provides fast hot module replacement (HMR) during development. Changes appear instantly in the browser.
+
+## Troubleshooting
+
+### Cannot connect to API
+
+Make sure the Firebase Functions emulator is running:
+```bash
+cd ../backend
+npm run serve
+```
+
+### Port already in use
+
+Change the Vite port in `vite.config.js`:
+```javascript
+export default defineConfig({
+  server: {
+    port: 3000 // Change to any available port
+  }
+})
+```
+
+## License
+
+ISC
