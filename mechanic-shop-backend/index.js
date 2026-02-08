@@ -29,12 +29,16 @@ const corsOptions = {
       'http://localhost:5173',
       'http://127.0.0.1:3000',
       'http://127.0.0.1:5173',
+      'https://mechanicshopapi.web.app', // Firebase Hosting
+      'https://mechanicshopapi.firebaseapp.com', // Firebase Hosting alternate
+      'https://valleyforgeautomotive.org', // Custom domain
+      'http://valleyforgeautomotive.org', // Custom domain (HTTP)
       'https://acolyer13.github.io',
       'https://mechanic-api-copy-with-testing-and.onrender.com'
     ];
     
     // In development, allow all origins
-    if (process.env.NODE_ENV === 'development' || origin.includes('localhost')) {
+    if (process.env.NODE_ENV === 'development' || (origin && origin.includes('localhost'))) {
       return callback(null, true);
     }
     

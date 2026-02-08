@@ -1,11 +1,11 @@
 /**
  * Customer Routes
- * Handles all customer-related endpoints including authentication
+ * Handles all customer-related endpoints with Firebase Authentication
  */
 
 const express = require('express');
-const bcrypt = require('bcrypt');
-const { generateToken, verifyToken } = require('../middleware/auth');
+const admin = require('firebase-admin');
+const { verifyToken } = require('../middleware/auth');
 const {
   COLLECTIONS,
   getAllDocuments,
@@ -21,6 +21,7 @@ const router = express.Router();
 
 /**
  * POST /customers - Register new customer
+ * Creates user in Firebase Auth and stores profile in Firestore
  */
 router.post('/', async (req, res) => {
   try {
@@ -33,73 +34,44 @@ router.post('/', async (req, res) => {
       });
     }
     
-    // Check if email already exists
-    const existingCustomer = await getCustomerByEmail(email);
-    if (existingCustomer) {
-      return res.status(409).json({ error: 'Email already exists' });
+    // Create user in Firebase Auth
+    let firebaseUser;
+    try {
+      firebaseUser = await admin.auth().createUser({
+        email: email,
+        password: password,
+        displayName: `${first_name} ${last_name}`
+      });
+    } catch (authError) {
+      if (authError.code === 'auth/email-already-exists') {
+        return res.status(409).json({ error: 'Email already exists' });
+      }
+      throw authError;
     }
     
-    // Hash password
-    const hashedPassword = await bcrypt.hash(password, 10);
-    
-    // Create customer
+    // Store customer profile in Firestore (no password stored here)
     const customerData = {
       first_name,
       last_name,
       email,
-      password: hashedPassword,
       phone: phone || null,
-      address: address || null
+      address: address || null,
+      uid: firebaseUser.uid // Link to Firebase Auth user
     };
     
-    const customer = await createDocument(COLLECTIONS.CUSTOMERS, customerData);
+    // Use Firebase UID as the document ID for easy lookup
+    const db = admin.firestore();
+    await db.collection(COLLECTIONS.CUSTOMERS).doc(firebaseUser.uid).set(customerData);
     
-    // Remove password from response
-    delete customer.password;
-    
-    return res.status(201).json(customer);
-  } catch (error) {
-    console.error('Error creating customer:', error);
-    return res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-/**
- * POST /customers/login - Customer login
- */
-router.post('/login', async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password required' });
-    }
-    
-    // Find customer by email
-    const customer = await getCustomerByEmail(email);
-    if (!customer) {
-      return res.status(401).json({ error: 'Invalid email or password' });
-    }
-    
-    // Verify password
-    const passwordMatch = await bcrypt.compare(password, customer.password);
-    if (!passwordMatch) {
-      return res.status(401).json({ error: 'Invalid email or password' });
-    }
-    
-    // Generate JWT token
-    const token = generateToken(customer.id, customer.email);
-    
-    // Remove password from response
-    delete customer.password;
-    
-    return res.status(200).json({
-      message: 'Login successful',
-      token,
-      customer
+    return res.status(201).json({
+      message: 'Customer registered successfully',
+      customer: {
+        id: firebaseUser.uid,
+        ...customerData
+      }
     });
   } catch (error) {
-    console.error('Error during login:', error);
+    console.error('Error creating customer:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
 });

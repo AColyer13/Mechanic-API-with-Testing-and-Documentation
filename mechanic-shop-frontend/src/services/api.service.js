@@ -1,10 +1,11 @@
 /**
  * API Service
- * Centralized API calls using Axios
+ * Centralized API calls using Axios with Firebase Authentication
  */
 
 import axios from 'axios';
 import { API_BASE_URL } from '../config/api';
+import { auth } from '../config/firebase';
 
 // Create axios instance with base configuration
 const api = axios.create({
@@ -14,12 +15,17 @@ const api = axios.create({
   },
 });
 
-// Request interceptor to add auth token
+// Request interceptor to add Firebase ID token
 api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+  async (config) => {
+    const user = auth.currentUser;
+    if (user) {
+      try {
+        const token = await user.getIdToken();
+        config.headers.Authorization = `Bearer ${token}`;
+      } catch (error) {
+        console.error('Error getting ID token:', error);
+      }
     }
     return config;
   },
@@ -33,10 +39,8 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token expired or invalid
-      localStorage.removeItem('token');
-      localStorage.removeItem('customer');
-      window.location.href = '/login';
+      // Token expired or invalid - Firebase will handle re-login
+      console.warn('Authentication error, user may need to re-login');
     }
     return Promise.reject(error);
   }
@@ -45,7 +49,7 @@ api.interceptors.response.use(
 // Customer API calls
 export const customerAPI = {
   register: (data) => api.post('/customers', data),
-  login: (data) => api.post('/customers/login', data),
+  // No login endpoint - Firebase Auth handles this
   getAll: () => api.get('/customers'),
   getById: (id) => api.get(`/customers/${id}`),
   update: (id, data) => api.put(`/customers/${id}`, data),
