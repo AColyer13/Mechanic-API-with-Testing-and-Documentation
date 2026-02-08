@@ -78,89 +78,90 @@ const Register = () => {
         {successMessage ? (
           <div className="success-message">{successMessage}</div>
         ) : (
-          <form onSubmit={handleSubmit}>
-            {error && <div className="error-message">{error}</div>}
-          
-          <div className="form-row">
+          <>
+            <form onSubmit={handleSubmit}>
+              {error && <div className="error-message">{error}</div>}
+            
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="first_name">First Name *</label>
+                <input
+                  type="text"
+                  id="first_name"
+                  name="first_name"
+                  value={formData.first_name}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="last_name">Last Name *</label>
+                <input
+                  type="text"
+                  id="last_name"
+                  name="last_name"
+                  value={formData.last_name}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+            </div>
+
             <div className="form-group">
-              <label htmlFor="first_name">First Name *</label>
+              <label htmlFor="email">Email *</label>
               <input
-                type="text"
-                id="first_name"
-                name="first_name"
-                value={formData.first_name}
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
                 onChange={handleChange}
                 required
               />
             </div>
 
             <div className="form-group">
-              <label htmlFor="last_name">Last Name *</label>
+              <label htmlFor="password">Password *</label>
               <input
-                type="text"
-                id="last_name"
-                name="last_name"
-                value={formData.last_name}
+                type="password"
+                id="password"
+                name="password"
+                value={formData.password}
                 onChange={handleChange}
                 required
               />
             </div>
-          </div>
 
-          <div className="form-group">
-            <label htmlFor="email">Email *</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
-          </div>
+            <div className="form-group">
+              <label htmlFor="phone">Phone</label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+              />
+            </div>
 
-          <div className="form-group">
-            <label htmlFor="password">Password *</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
-          </div>
+            <div className="form-group">
+              <label htmlFor="address">Address</label>
+              <textarea
+                id="address"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+                rows="3"
+              />
+            </div>
 
-          <div className="form-group">
-            <label htmlFor="phone">Phone</label>
-            <input
-              type="tel"
-              id="phone"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-            />
-          </div>
+            <button type="submit" className="btn-primary" disabled={loading}>
+              {loading ? 'Registering...' : 'Register'}
+            </button>
+          </form>
 
-          <div className="form-group">
-            <label htmlFor="address">Address</label>
-            <textarea
-              id="address"
-              name="address"
-              value={formData.address}
-              onChange={handleChange}
-              rows="3"
-            />
-          </div>
+          <div className="form-divider"></div>
 
-          <button type="submit" className="btn-primary" disabled={loading}>
-            {loading ? 'Registering...' : 'Register'}
-          </button>
-        </form>
-
-        <div style={{ position: 'relative', borderTop: '1px solid #e0e0e0', margin: '20px 0' }}></div>
-
-        <button 
+          <button 
           onClick={handleGoogleRegister}
           disabled={loading}
           className="btn-google"
@@ -197,7 +198,8 @@ const Register = () => {
             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
           </svg>
           {loading ? 'Signing in...' : 'Sign up with Google'}
-        </button>
+          </button>
+          </>
         )}
 
         <p className="auth-link">
