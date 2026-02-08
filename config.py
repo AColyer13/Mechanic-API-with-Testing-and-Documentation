@@ -17,7 +17,6 @@ class ProductionConfig(Config):
     DEBUG = False
     SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI')
     CACHE_TYPE = 'SimpleCache'
-    SQLALCHEMY_ENGINE_OPTIONS = {'connect_args': {'sslmode': 'require'}}
 
 class TestingConfig(Config):
     """Testing configuration"""
