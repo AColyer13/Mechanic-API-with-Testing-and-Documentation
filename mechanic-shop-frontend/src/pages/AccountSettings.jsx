@@ -101,8 +101,10 @@ const AccountSettings = () => {
       return;
     }
 
-    // Check if phone number is being changed
-    const phoneChanged = profileForm.phone !== (customer.phone || '');
+    // Check if phone number is being changed (normalize empty strings and nulls)
+    const currentPhone = (customer.phone || '').trim();
+    const newPhone = (profileForm.phone || '').trim();
+    const phoneChanged = newPhone !== currentPhone && newPhone !== '';
 
     const updatePayload = {
       first_name: profileForm.first_name,
@@ -113,7 +115,7 @@ const AccountSettings = () => {
     };
 
     // If phone is being changed, require verification
-    if (phoneChanged && profileForm.phone) {
+    if (phoneChanged) {
       setMfaError('');
       setMfaMessage('');
       setMfaLoading(true);
@@ -209,9 +211,17 @@ const AccountSettings = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Address
+                  Location
                 </label>
-                <p className="text-gray-900">{customer?.address || 'Not provided'}</p>
+                <p className="text-gray-900">
+                  {customer?.city && customer?.state 
+                    ? `${customer.city}, ${customer.state}` 
+                    : customer?.city 
+                      ? customer.city 
+                      : customer?.state 
+                        ? customer.state 
+                        : 'Not provided'}
+                </p>
               </div>
             </div>
           </div>
@@ -332,7 +342,7 @@ const AccountSettings = () => {
                   setMfaLoading(true);
 
                   try {
-                    const res = await finalizePhoneEnrollment(verificationId, verificationCode, `${profileForm.first_name} ${profileForm.last_name}`);
+                    const res = await finalizePhoneEnrollment(verificationId, verificationCode, `${profileForm.first_name} ${profileForm.last_name}`, profileForm.phone);
                     if (res.success) {
                       // Now save the profile update
                       const updatePayload = {

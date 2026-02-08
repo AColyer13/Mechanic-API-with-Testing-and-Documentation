@@ -380,7 +380,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Complete phone MFA enrollment using the verificationId + code
-  const finalizePhoneEnrollment = async (verificationId, verificationCode, displayName) => {
+  const finalizePhoneEnrollment = async (verificationId, verificationCode, displayName, phoneNumber = null) => {
     try {
       if (!user) return { success: false, error: 'User not authenticated' };
 
@@ -388,11 +388,25 @@ export const AuthProvider = ({ children }) => {
       const assertion = PhoneMultiFactorGenerator.assertion(phoneCredential);
 
       const mfa = multiFactor(user);
+      
+      // If changing phone number, unenroll existing phone factors first
+      if (phoneNumber) {
+        const enrolledFactors = mfa.enrolledFactors;
+        for (const factor of enrolledFactors) {
+          if (factor.factorId === PhoneMultiFactorGenerator.FACTOR_ID) {
+            await mfa.unenroll(factor);
+          }
+        }
+      }
+      
       await mfa.enroll(assertion, displayName || 'Phone');
 
       // Update backend customer record to mark phone as verified
       try {
-        await customerAPI.update(user.uid, { phone: user.phoneNumber || null, phone_verified: true });
+        await customerAPI.update(user.uid, { 
+          phone: phoneNumber || user.phoneNumber || null, 
+          phone_verified: true 
+        });
         await refreshCustomer();
       } catch (err) {
         console.warn('Failed to update customer phone_verified:', err);
