@@ -1,0 +1,4 @@
+const { expect } = require('chai');
+describe('security/cors/cors placeholder', () => {
+  it('placeholder', () => expect(true).to.equal(true));
+});

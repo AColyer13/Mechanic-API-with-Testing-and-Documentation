@@ -59,10 +59,26 @@ async function clearFirestore() {
 }
 
 /**
+ * Clear all Auth users
+ */
+async function clearAuth() {
+  const auth = admin.auth();
+  try {
+    const listUsersResult = await auth.listUsers();
+    const deletePromises = listUsersResult.users.map(user => auth.deleteUser(user.uid));
+    await Promise.all(deletePromises);
+  } catch (error) {
+    // Ignore errors if no users exist
+    console.log('No auth users to clear or error clearing:', error.message);
+  }
+}
+
+/**
  * Setup before all tests
  */
 async function setupTests() {
   initializeAdmin();
+  await clearAuth();
   await clearFirestore();
 }
 
@@ -70,6 +86,7 @@ async function setupTests() {
  * Teardown after all tests
  */
 async function teardownTests() {
+  await clearAuth();
   await clearFirestore();
   if (admin.apps.length) {
     await Promise.all(admin.apps.map(app => app.delete()));
@@ -80,6 +97,7 @@ async function teardownTests() {
  * Clear data after each test
  */
 async function afterEachTest() {
+  await clearAuth();
   await clearFirestore();
 }
 
@@ -88,6 +106,7 @@ module.exports = {
   BASE_URL,
   initializeAdmin,
   clearFirestore,
+  clearAuth,
   setupTests,
   teardownTests,
   afterEachTest,
