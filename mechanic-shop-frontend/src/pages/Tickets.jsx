@@ -14,6 +14,7 @@ const Tickets = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('Open');
   const [updatingId, setUpdatingId] = useState(null);
+  const [deletingId, setDeletingId] = useState(null);
 
   useEffect(() => {
     fetchTickets();
@@ -41,6 +42,23 @@ const Tickets = () => {
       console.error('Error updating ticket status:', error);
     } finally {
       setUpdatingId(null);
+    }
+  };
+
+  const deleteTicket = async (ticketId) => {
+    const ok = window.confirm('Are you sure you want to permanently delete this completed ticket?');
+    if (!ok) return;
+
+    setDeletingId(ticketId);
+    try {
+      await serviceTicketAPI.delete(ticketId);
+      // Refresh tickets after deletion
+      const response = await serviceTicketAPI.getByCustomer(customer.id);
+      setTickets(response.data);
+    } catch (error) {
+      console.error('Error deleting ticket:', error);
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -201,6 +219,25 @@ const Tickets = () => {
                     <option value="In Progress">In Progress</option>
                     <option value="Completed">Completed</option>
                   </select>
+
+                  {ticket.status === 'Completed' && (
+                    <button
+                      className="btn-delete"
+                      onClick={() => deleteTicket(ticket.id)}
+                      disabled={deletingId === ticket.id}
+                      style={{
+                        marginLeft: '8px',
+                        backgroundColor: '#e74c3c',
+                        color: '#fff',
+                        border: 'none',
+                        padding: '8px 10px',
+                        borderRadius: '4px',
+                        cursor: deletingId === ticket.id ? 'not-allowed' : 'pointer'
+                      }}
+                    >
+                      {deletingId === ticket.id ? 'Deleting...' : 'Delete'}
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
