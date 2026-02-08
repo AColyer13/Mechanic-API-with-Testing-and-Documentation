@@ -5,6 +5,8 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { customerAPI } from '../services/api.service';
+import { auth } from '../config/firebase';
 import './Auth.css';
 
 const VerifyEmail = () => {
@@ -13,6 +15,8 @@ const VerifyEmail = () => {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [cooldown, setCooldown] = useState(0);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(259200); // 3 days in seconds
 
   useEffect(() => {
     // Check if email is verified every 3 seconds
@@ -31,6 +35,14 @@ const VerifyEmail = () => {
     }
   }, [cooldown]);
 
+  useEffect(() => {
+    // Countdown timer for account auto-deletion (3 days)
+    if (timeLeft > 0) {
+      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [timeLeft]);
+
   const handleResendEmail = async () => {
     setLoading(true);
     setError('');
@@ -46,6 +58,36 @@ const VerifyEmail = () => {
     }
 
     setLoading(false);
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+      return;
+    }
+
+    setDeleteLoading(true);
+    setError('');
+    setMessage('');
+
+    try {
+      await customerAPI.delete(user.uid);
+      // Account deleted successfully, logout user
+      await auth.signOut();
+      setMessage('Account deleted successfully');
+    } catch (err) {
+      const backendError = err.response?.data?.error || 'Failed to delete account';
+      setError(backendError);
+    }
+
+    setDeleteLoading(false);
+  };
+
+  const formatTimeLeft = (seconds) => {
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor((seconds % 86400) / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return `${days}d ${hours}h ${minutes}m ${secs}s`;
   };
 
   if (isEmailVerified) {
@@ -138,7 +180,39 @@ const VerifyEmail = () => {
           fontSize: '13px',
           color: '#856404'
         }}>
-          <strong>Tip:</strong> Sometimes emails take a few minutes to arrive. You'll be automatically verified once you click the link.
+          <strong>Account Auto-Deletion:</strong> Unverified accounts will be automatically deleted in {formatTimeLeft(timeLeft)}.
+        </div>
+
+        <button
+          onClick={handleDeleteAccount}
+          disabled={deleteLoading}
+          style={{
+            width: '100%',
+            padding: '12px',
+            backgroundColor: '#dc3545',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            fontSize: '16px',
+            fontWeight: '600',
+            cursor: deleteLoading ? 'not-allowed' : 'pointer',
+            transition: 'background-color 0.3s',
+            marginTop: '16px'
+          }}
+        >
+          {deleteLoading ? 'Deleting...' : 'Delete Account'}
+        </button>
+
+        <div style={{ 
+          backgroundColor: '#f8d7da', 
+          border: '1px solid #f5c6cb', 
+          borderRadius: '4px', 
+          padding: '12px',
+          marginTop: '16px',
+          fontSize: '13px',
+          color: '#721c24'
+        }}>
+          <strong>Warning:</strong> Deleting your account will permanently remove all your data and cannot be undone.
         </div>
       </div>
     </div>

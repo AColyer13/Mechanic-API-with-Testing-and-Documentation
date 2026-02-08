@@ -58,6 +58,7 @@ router.post('/', async (req, res) => {
       phone_verified: false,
       city: city || null,
       state: state || null,
+      created_at: admin.firestore.FieldValue.serverTimestamp(),
       uid: firebaseUser.uid // Link to Firebase Auth user
     };
     

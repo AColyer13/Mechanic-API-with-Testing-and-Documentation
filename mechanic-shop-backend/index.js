@@ -119,6 +119,73 @@ app.use((err, req, res, next) => {
 // This makes your entire API available at: https://REGION-PROJECT_ID.cloudfunctions.net/api
 exports.api = functions.https.onRequest(app);
 
+// Scheduled function to auto-delete unverified accounts after 3 days
+exports.autoDeleteUnverifiedAccounts = functions.pubsub
+  .schedule('every 24 hours')
+  .onRun(async (context) => {
+    const admin = require('firebase-admin');
+    const { getFirestore } = require('firebase-admin/firestore');
+    
+    // Initialize Firestore if not already initialized
+    if (!admin.apps.length) {
+      admin.initializeApp();
+    }
+    
+    const db = getFirestore();
+    const auth = admin.auth();
+    
+    try {
+      console.log('Starting auto-deletion of unverified accounts...');
+      
+      // Get all customers
+      const customersSnapshot = await db.collection('customers').get();
+      const now = new Date();
+      const threeDaysAgo = new Date(now.getTime() - (3 * 24 * 60 * 60 * 1000)); // 3 days in milliseconds
+      
+      let deletedCount = 0;
+      
+      for (const doc of customersSnapshot.docs) {
+        const customer = doc.data();
+        const customerId = doc.id;
+        
+        // Check if account is unverified and older than 3 days
+        if (!customer.email_verified && customer.created_at && customer.created_at.toDate() < threeDaysAgo) {
+          try {
+            // Delete customer document
+            await db.collection('customers').doc(customerId).delete();
+            
+            // Delete associated service tickets
+            const ticketsSnapshot = await db.collection('service_tickets')
+              .where('customer_id', '==', customerId)
+              .get();
+            
+            for (const ticketDoc of ticketsSnapshot.docs) {
+              await db.collection('service_tickets').doc(ticketDoc.id).delete();
+            }
+            
+            // Delete Firebase Auth user
+            try {
+              await auth.deleteUser(customerId);
+            } catch (authError) {
+              console.warn(`Failed to delete Firebase Auth user ${customerId}:`, authError);
+            }
+            
+            deletedCount++;
+            console.log(`Deleted unverified account: ${customer.email} (${customerId})`);
+          } catch (error) {
+            console.error(`Failed to delete account ${customerId}:`, error);
+          }
+        }
+      }
+      
+      console.log(`Auto-deletion completed. Deleted ${deletedCount} unverified accounts.`);
+      return null;
+    } catch (error) {
+      console.error('Error in auto-delete function:', error);
+      throw error;
+    }
+  });
+
 // Optional: Individual function exports for testing
 // exports.createCustomer = functions.https.onRequest((req, res) => {
 //   // Individual function logic

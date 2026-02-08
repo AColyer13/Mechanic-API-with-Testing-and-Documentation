@@ -37,7 +37,7 @@ export default defineConfig({
     video: 'retain-on-failure',
   },
 
-  /* Configure projects for major browsers */
+  /* Configure projects for major browsers and mobile devices */
   projects: [
     {
       name: 'chromium',
@@ -45,6 +45,18 @@ export default defineConfig({
         ...devices['Desktop Chrome'],
         viewport: { width: 1280, height: 720 }
       },
+    },
+    {
+      name: 'Mobile Chrome',
+      use: { ...devices['Pixel 5'] },
+    },
+    {
+      name: 'Mobile Safari',
+      use: { ...devices['iPhone 12'] },
+    },
+    {
+      name: 'Tablet',
+      use: { ...devices['iPad Air'] },
     },
   ],
 

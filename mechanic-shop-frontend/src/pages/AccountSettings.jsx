@@ -8,7 +8,7 @@ import { useAuth } from '../context/AuthContext';
 import { customerAPI } from '../services/api.service';
 
 const AccountSettings = () => {
-  const { user, customer, changeEmail, sendVerificationEmail, refreshUser, refreshCustomer, startPhoneEnrollment, finalizePhoneEnrollment } = useAuth();
+  const { user, customer, changeEmail, sendVerificationEmail, refreshUser, refreshCustomer } = useAuth();
   const [profileForm, setProfileForm] = useState({
     first_name: '',
     last_name: '',
@@ -23,12 +23,6 @@ const AccountSettings = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const [mfaSent, setMfaSent] = useState(false);
-  const [verificationId, setVerificationId] = useState(null);
-  const [verificationCode, setVerificationCode] = useState('');
-  const [mfaLoading, setMfaLoading] = useState(false);
-  const [mfaMessage, setMfaMessage] = useState('');
-  const [mfaError, setMfaError] = useState('');
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
@@ -103,11 +97,6 @@ const AccountSettings = () => {
       return;
     }
 
-    // Check if phone number is being changed (normalize empty strings and nulls)
-    const currentPhone = (customer.phone || '').trim();
-    const newPhone = (profileForm.phone || '').trim();
-    const phoneChanged = newPhone !== currentPhone && newPhone !== '';
-
     const updatePayload = {
       first_name: profileForm.first_name,
       last_name: profileForm.last_name,
@@ -115,28 +104,6 @@ const AccountSettings = () => {
       city: profileForm.city,
       state: profileForm.state
     };
-
-    // If phone is being changed, require verification
-    if (phoneChanged) {
-      setMfaError('');
-      setMfaMessage('');
-      setMfaLoading(true);
-      try {
-        const res = await startPhoneEnrollment(profileForm.phone);
-        if (res.success) {
-          setVerificationId(res.verificationId);
-          setMfaSent(true);
-          setMfaMessage('Verification code sent to new phone number. Please verify to complete the change.');
-        } else {
-          setMfaError(res.error || 'Failed to send verification code');
-        }
-      } catch (err) {
-        setMfaError(err.message || 'Failed to send verification code');
-      }
-      setMfaLoading(false);
-      setLoading(false);
-      return;
-    }
 
     try {
       const response = await customerAPI.update(customer.id, updatePayload);
@@ -213,15 +180,6 @@ const AccountSettings = () => {
                 </label>
                 <div className="flex items-center gap-2">
                   <p className="text-gray-900">{customer?.phone || 'Not provided'}</p>
-                  {customer?.phone_verified ? (
-                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      Verified
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                      Unverified
-                    </span>
-                  )}
                 </div>
               </div>
 
@@ -242,18 +200,7 @@ const AccountSettings = () => {
             </div>
           </div>
 
-          {/* Multi-factor Authentication (Optional) */}
-          <div className="bg-white rounded-xl shadow-md p-4 md:p-6 lg:p-8">
-            <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-4">Two-Step Verification</h2>
 
-            <p className="text-sm text-gray-700 mb-3">Two-step verification is required for account security and was set up during registration.</p>
-
-            <div className="bg-green-50 border border-green-200 rounded p-3">
-              <p className="text-sm text-green-700">
-                <strong>Status:</strong> Enabled (Phone verification required)
-              </p>
-            </div>
-          </div>
           {/* Edit Account Information */}
           <div className="bg-white rounded-xl shadow-md p-4 md:p-6 lg:p-8">
             <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-4">
@@ -340,95 +287,7 @@ const AccountSettings = () => {
             </form>
           </div>
 
-          {/* Phone Verification for Profile Update */}
-          {mfaSent && (
-            <div className="bg-white rounded-xl shadow-md p-4 md:p-6 lg:p-8">
-              <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-4">
-                Verify New Phone Number
-              </h2>
 
-              {mfaError && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-3">{mfaError}</div>}
-              {mfaMessage && <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded mb-3">{mfaMessage}</div>}
-
-              <form
-                onSubmit={async (e) => {
-                  e.preventDefault();
-                  setMfaError('');
-                  setMfaMessage('');
-                  setMfaLoading(true);
-
-                  try {
-                    const res = await finalizePhoneEnrollment(verificationId, verificationCode, `${profileForm.first_name} ${profileForm.last_name}`, profileForm.phone);
-                    if (res.success) {
-                      // Now save the profile update
-                      const updatePayload = {
-                        first_name: profileForm.first_name,
-                        last_name: profileForm.last_name,
-                        phone: profileForm.phone,
-                        phone_verified: true,
-                        city: profileForm.city,
-                        state: profileForm.state
-                      };
-
-                      try {
-                        await customerAPI.update(customer.id, updatePayload);
-                        setMessage('Profile updated successfully with verified phone number');
-                        await refreshCustomer();
-                        setMfaSent(false);
-                        setVerificationCode('');
-                        setVerificationId(null);
-                      } catch (err) {
-                        setMfaError('Phone verified but failed to update profile');
-                      }
-                    } else {
-                      setMfaError(res.error || 'Verification failed');
-                    }
-                  } catch (err) {
-                    setMfaError(err.message || 'Verification failed');
-                  }
-
-                  setMfaLoading(false);
-                }}
-                className="space-y-4"
-              >
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Enter verification code sent to {profileForm.phone}</label>
-                  <input
-                    type="text"
-                    value={verificationCode}
-                    onChange={(e) => setVerificationCode(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    placeholder="123456"
-                    required
-                  />
-                </div>
-
-                <div className="flex gap-2">
-                  <button
-                    type="submit"
-                    disabled={mfaLoading}
-                    className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded font-medium disabled:opacity-50"
-                  >
-                    {mfaLoading ? 'Verifying...' : 'Verify & Save Changes'}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMfaSent(false);
-                      setVerificationId(null);
-                      setVerificationCode('');
-                      setMfaMessage('');
-                      setMfaError('');
-                    }}
-                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            </div>
-          )}
 
           {/* Email Verification */}
           {!user?.emailVerified && (
