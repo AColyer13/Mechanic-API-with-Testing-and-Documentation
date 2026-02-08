@@ -14,7 +14,10 @@ import {
   updateEmail,
   reload,
   signInWithPopup,
-  GoogleAuthProvider
+  GoogleAuthProvider,
+  fetchSignInMethodsForEmail,
+  EmailAuthProvider,
+  linkWithCredential
 } from 'firebase/auth';
 import { auth } from '../config/firebase';
 import { customerAPI } from '../services/api.service';
@@ -25,6 +28,7 @@ export const AuthProvider = ({ children }) => {
   const [customer, setCustomer] = useState(null);
   const [user, setUser] = useState(null); // Firebase user
   const [loading, setLoading] = useState(true);
+  const [pendingLink, setPendingLink] = useState(null);
 
   useEffect(() => {
     // Listen to Firebase auth state changes
@@ -62,6 +66,20 @@ export const AuthProvider = ({ children }) => {
       await signInWithEmailAndPassword(auth, email, password);
       return { success: true };
     } catch (error) {
+      if (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+        try {
+          const methods = await fetchSignInMethodsForEmail(auth, email);
+          if (methods.includes('google.com')) {
+            return {
+              success: false,
+              error: 'This email is linked to Google. Please sign in with Google to continue.'
+            };
+          }
+        } catch (methodError) {
+          console.warn('Error checking sign-in methods:', methodError);
+        }
+      }
+
       const errorMessage = error.code === 'auth/invalid-credential' 
         ? 'Invalid email or password'
         : error.code === 'auth/user-not-found'
@@ -82,22 +100,6 @@ export const AuthProvider = ({ children }) => {
       const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
       const firebaseUser = result.user;
-      
-      // Check if this email is already registered with email/password
-      try {
-        const emailCheckResponse = await customerAPI.checkEmailExists(firebaseUser.email);
-        if (emailCheckResponse.data.exists) {
-          // Email is already registered with email/password, sign them out and show error
-          await signOut(auth);
-          return {
-            success: false,
-            error: `An account with email "${firebaseUser.email}" already exists. Please use your email and password to login instead.`
-          };
-        }
-      } catch (emailCheckError) {
-        console.warn('Error checking email existence:', emailCheckError);
-        // Continue anyway - this is not a critical check
-      }
       
       // Check if customer profile exists in Firestore (for this Google account)
       try {
@@ -124,6 +126,21 @@ export const AuthProvider = ({ children }) => {
         }
       }
     } catch (error) {
+      if (error.code === 'auth/account-exists-with-different-credential') {
+        const pendingCredential = GoogleAuthProvider.credentialFromError(error);
+        const email = error.customData?.email;
+
+        if (email && pendingCredential) {
+          setPendingLink({ email, credential: pendingCredential });
+          return {
+            success: false,
+            requiresAccountMerge: true,
+            email,
+            error: 'An account with this email already exists. Enter your password to merge the accounts.'
+          };
+        }
+      }
+
       const errorMessage = error.code === 'auth/popup-closed-by-user'
         ? 'Sign-in cancelled'
         : error.code === 'auth/popup-blocked'
@@ -134,6 +151,54 @@ export const AuthProvider = ({ children }) => {
         success: false,
         error: errorMessage,
       };
+    }
+  };
+
+  const mergeGoogleWithPassword = async (password) => {
+    if (!pendingLink?.email || !pendingLink?.credential) {
+      return { success: false, error: 'No merge request is pending' };
+    }
+
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, pendingLink.email, password);
+      await linkWithCredential(userCredential.user, pendingLink.credential);
+      setPendingLink(null);
+      return { success: true };
+    } catch (error) {
+      const errorMessage = error.code === 'auth/wrong-password'
+        ? 'Incorrect password'
+        : error.code === 'auth/too-many-requests'
+        ? 'Too many attempts. Please try again later.'
+        : 'Account merge failed';
+
+      return { success: false, error: errorMessage };
+    }
+  };
+
+  const linkPasswordToGoogle = async (email, password) => {
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const firebaseUser = result.user;
+
+      if (firebaseUser?.email !== email) {
+        await signOut(auth);
+        return { success: false, error: 'Google account email does not match the email you entered.' };
+      }
+
+      const emailCredential = EmailAuthProvider.credential(email, password);
+      await linkWithCredential(firebaseUser, emailCredential);
+      return { success: true };
+    } catch (error) {
+      const errorMessage = error.code === 'auth/credential-already-in-use'
+        ? 'These credentials are already linked to another account'
+        : error.code === 'auth/popup-closed-by-user'
+        ? 'Sign-in cancelled'
+        : error.code === 'auth/popup-blocked'
+        ? 'Sign-in popup was blocked. Please allow popups for this site.'
+        : 'Failed to link Google account';
+
+      return { success: false, error: errorMessage };
     }
   };
 
@@ -159,9 +224,32 @@ export const AuthProvider = ({ children }) => {
       
       return loginResult;
     } catch (error) {
+      const backendError = error.response?.data?.error || error.response?.data?.errors?.[0];
+
+      if (backendError === 'Email already exists') {
+        try {
+          const methods = await fetchSignInMethodsForEmail(auth, userData.email);
+          if (methods.includes('google.com')) {
+            return {
+              success: false,
+              requiresGoogleLink: true,
+              email: userData.email,
+              error: 'This email is already linked to Google. Link your Google account to finish.'
+            };
+          }
+        } catch (methodError) {
+          console.warn('Error checking sign-in methods:', methodError);
+        }
+
+        return {
+          success: false,
+          error: 'An account with this email already exists. Please log in.'
+        };
+      }
+
       return {
         success: false,
-        error: error.response?.data?.error || error.response?.data?.errors?.[0] || 'Registration failed',
+        error: backendError || 'Registration failed',
       };
     }
   };
@@ -249,6 +337,8 @@ export const AuthProvider = ({ children }) => {
     loading,
     login,
     loginWithGoogle,
+    mergeGoogleWithPassword,
+    linkPasswordToGoogle,
     register,
     logout,
     sendVerificationEmail,

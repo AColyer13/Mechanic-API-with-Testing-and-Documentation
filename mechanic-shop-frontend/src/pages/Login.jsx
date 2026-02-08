@@ -14,8 +14,11 @@ const Login = () => {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [mergeRequired, setMergeRequired] = useState(false);
+  const [mergeEmail, setMergeEmail] = useState('');
+  const [mergePassword, setMergePassword] = useState('');
   
-  const { login, loginWithGoogle } = useAuth();
+  const { login, loginWithGoogle, mergeGoogleWithPassword } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -28,6 +31,9 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setMergeRequired(false);
+    setMergeEmail('');
+    setMergePassword('');
     setLoading(true);
 
     const result = await login(formData.email, formData.password);
@@ -44,16 +50,39 @@ const Login = () => {
   const handleGoogleLogin = async (e) => {
     e.preventDefault();
     setError('');
+    setMergeRequired(false);
+    setMergeEmail('');
+    setMergePassword('');
     setLoading(true);
 
     const result = await loginWithGoogle();
     
     if (result.success) {
       navigate('/dashboard');
+    } else if (result.requiresAccountMerge) {
+      setMergeRequired(true);
+      setMergeEmail(result.email || '');
+      setError(result.error);
     } else {
       setError(result.error);
     }
     
+    setLoading(false);
+  };
+
+  const handleMergeSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    const result = await mergeGoogleWithPassword(mergePassword);
+
+    if (result.success) {
+      navigate('/dashboard');
+    } else {
+      setError(result.error);
+    }
+
     setLoading(false);
   };
 
@@ -136,6 +165,28 @@ const Login = () => {
           </svg>
           {loading ? 'Signing in...' : 'Sign in with Google'}
         </button>
+
+        {mergeRequired && (
+          <form onSubmit={handleMergeSubmit} style={{ marginTop: '16px' }}>
+            <div className="success-message">
+              We found an existing password account for {mergeEmail || 'this email'}. Enter your password to merge.
+            </div>
+            <div className="form-group">
+              <label htmlFor="mergePassword">Password</label>
+              <input
+                type="password"
+                id="mergePassword"
+                name="mergePassword"
+                value={mergePassword}
+                onChange={(e) => setMergePassword(e.target.value)}
+                required
+              />
+            </div>
+            <button type="submit" className="btn-primary" disabled={loading}>
+              {loading ? 'Merging...' : 'Merge Accounts'}
+            </button>
+          </form>
+        )}
 
         <p className="auth-link">
           Don't have an account? <Link to="/register">Register here</Link>

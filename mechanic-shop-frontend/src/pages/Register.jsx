@@ -19,8 +19,10 @@ const Register = () => {
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [requiresGoogleLink, setRequiresGoogleLink] = useState(false);
+  const [mergeRequired, setMergeRequired] = useState(false);
   
-  const { register, loginWithGoogle } = useAuth();
+  const { register, loginWithGoogle, linkPasswordToGoogle, mergeGoogleWithPassword } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -33,6 +35,9 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccessMessage('');
+    setRequiresGoogleLink(false);
+    setMergeRequired(false);
     setLoading(true);
 
     const result = await register(formData);
@@ -45,6 +50,9 @@ const Register = () => {
       } else {
         navigate('/dashboard');
       }
+    } else if (result.requiresGoogleLink) {
+      setRequiresGoogleLink(true);
+      setError(result.error);
     } else {
       setError(result.error);
     }
@@ -56,6 +64,8 @@ const Register = () => {
     e.preventDefault();
     setError('');
     setSuccessMessage('');
+    setRequiresGoogleLink(false);
+    setMergeRequired(false);
     setLoading(true);
 
     const result = await loginWithGoogle();
@@ -63,10 +73,49 @@ const Register = () => {
     if (result.success) {
       setSuccessMessage('Account created and signed in with Google! Redirecting...');
       setTimeout(() => navigate('/dashboard'), 1500);
+    } else if (result.requiresAccountMerge) {
+      setMergeRequired(true);
+      setError(result.error);
     } else {
       setError(result.error);
     }
     
+    setLoading(false);
+  };
+
+  const handleGoogleLink = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccessMessage('');
+    setLoading(true);
+
+    const result = await linkPasswordToGoogle(formData.email, formData.password);
+
+    if (result.success) {
+      setSuccessMessage('Accounts linked! Redirecting...');
+      setTimeout(() => navigate('/dashboard'), 1500);
+    } else {
+      setError(result.error);
+    }
+
+    setLoading(false);
+  };
+
+  const handleMergeWithPassword = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccessMessage('');
+    setLoading(true);
+
+    const result = await mergeGoogleWithPassword(formData.password);
+
+    if (result.success) {
+      setSuccessMessage('Accounts merged! Redirecting...');
+      setTimeout(() => navigate('/dashboard'), 1500);
+    } else {
+      setError(result.error);
+    }
+
     setLoading(false);
   };
 
@@ -81,6 +130,36 @@ const Register = () => {
           <>
             <form onSubmit={handleSubmit}>
               {error && <div className="error-message">{error}</div>}
+              {requiresGoogleLink && (
+                <div className="success-message">
+                  This email already uses Google. Link your Google account to finish registration.
+                </div>
+              )}
+              {requiresGoogleLink && (
+                <button
+                  type="button"
+                  onClick={handleGoogleLink}
+                  disabled={loading}
+                  className="btn-google"
+                >
+                  {loading ? 'Linking...' : 'Link with Google'}
+                </button>
+              )}
+              {mergeRequired && (
+                <div className="success-message">
+                  We found an existing password account. Enter your password and merge to continue.
+                </div>
+              )}
+              {mergeRequired && (
+                <button
+                  type="button"
+                  onClick={handleMergeWithPassword}
+                  disabled={loading || !formData.password}
+                  className="btn-primary"
+                >
+                  {loading ? 'Merging...' : 'Merge Accounts'}
+                </button>
+              )}
             
             <div className="form-row">
               <div className="form-group">
