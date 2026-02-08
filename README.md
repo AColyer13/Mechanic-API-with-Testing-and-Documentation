@@ -1,7 +1,7 @@
 
 # Mechanic Shop API
 
-https://mechanicshopapi.web.app/login
+[https://mechanicshopapi.web.app/login](https://mechanicshopapi.web.app/)
 
 A full‑featured **RESTful API** for managing a mechanic shop, available in two versions:
 1. **Flask (Python)** - Original version with MySQL
