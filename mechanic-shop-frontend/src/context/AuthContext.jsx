@@ -12,7 +12,9 @@ import {
   sendEmailVerification,
   sendPasswordResetEmail,
   updateEmail,
-  reload
+  reload,
+  signInWithPopup,
+  GoogleAuthProvider
 } from 'firebase/auth';
 import { auth } from '../config/firebase';
 import { customerAPI } from '../services/api.service';
@@ -60,6 +62,50 @@ export const AuthProvider = ({ children }) => {
         : error.code === 'auth/wrong-password'
         ? 'Incorrect password'
         : 'Login failed';
+      
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    }
+  };
+
+  const loginWithGoogle = async () => {
+    try {
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const firebaseUser = result.user;
+      
+      // Check if customer profile exists in Firestore
+      try {
+        await customerAPI.getById(firebaseUser.uid);
+        // Profile exists, login successful
+        return { success: true };
+      } catch (error) {
+        // Profile doesn't exist, create one from Google data
+        const userData = {
+          first_name: firebaseUser.displayName?.split(' ')[0] || 'User',
+          last_name: firebaseUser.displayName?.split(' ').slice(1).join(' ') || '',
+          email: firebaseUser.email,
+          phone: null,
+          address: null,
+        };
+        
+        try {
+          await customerAPI.register(userData);
+          return { success: true };
+        } catch (registrationError) {
+          console.error('Error creating profile after Google login:', registrationError);
+          // Profile creation failed but user is logged in, so return success
+          return { success: true };
+        }
+      }
+    } catch (error) {
+      const errorMessage = error.code === 'auth/popup-closed-by-user'
+        ? 'Sign-in cancelled'
+        : error.code === 'auth/popup-blocked'
+        ? 'Sign-in popup was blocked. Please allow popups for this site.'
+        : 'Google sign-in failed';
       
       return {
         success: false,
@@ -179,6 +225,7 @@ export const AuthProvider = ({ children }) => {
     user,
     loading,
     login,
+    loginWithGoogle,
     register,
     logout,
     sendVerificationEmail,
