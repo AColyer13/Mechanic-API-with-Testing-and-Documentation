@@ -6,12 +6,15 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import Navbar from './components/Navbar';
+import EmailVerificationBanner from './components/EmailVerificationBanner';
 import ProtectedRoute from './components/ProtectedRoute';
 
 // Pages
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
+import AccountSettings from './pages/AccountSettings';
 import Dashboard from './pages/Dashboard';
 import Tickets from './pages/Tickets';
 import CreateTicket from './pages/CreateTicket';
@@ -25,10 +28,12 @@ function App() {
         <div className="min-h-screen flex flex-col bg-gray-50">
           <Navbar />
           <main className="flex-1">
+            <EmailVerificationBanner />
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
               
               {/* Protected Routes */}
               <Route
@@ -48,10 +53,10 @@ function App() {
                 }
               />
               <Route
-                path="/create-ticket"
+                path="/account-settings"
                 element={
                   <ProtectedRoute>
-                    <CreateTicket />
+                    <AccountSettings />
                   </ProtectedRoute>
                 }
               />

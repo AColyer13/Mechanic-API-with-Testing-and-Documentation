@@ -17,6 +17,7 @@ const Register = () => {
     address: '',
   });
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [loading, setLoading] = useState(false);
   
   const { register } = useAuth();
@@ -37,7 +38,11 @@ const Register = () => {
     const result = await register(formData);
     
     if (result.success) {
-      navigate('/dashboard');
+      if (result.requiresEmailVerification) {
+        setSuccessMessage('Registration successful! Please check your email to verify your account before logging in.');
+      } else {
+        navigate('/dashboard');
+      }
     } else {
       setError(result.error);
     }
@@ -49,8 +54,12 @@ const Register = () => {
     <div className="auth-container">
       <div className="auth-card">
         <h2>Register</h2>
-        <form onSubmit={handleSubmit}>
-          {error && <div className="error-message">{error}</div>}
+        
+        {successMessage ? (
+          <div className="success-message">{successMessage}</div>
+        ) : (
+          <form onSubmit={handleSubmit}>
+            {error && <div className="error-message">{error}</div>}
           
           <div className="form-row">
             <div className="form-group">
@@ -128,6 +137,7 @@ const Register = () => {
             {loading ? 'Registering...' : 'Register'}
           </button>
         </form>
+        )}
 
         <p className="auth-link">
           Already have an account? <Link to="/login">Login here</Link>

@@ -49,6 +49,9 @@ const Navbar = () => {
                 <Link to="/create-ticket" className="text-white hover:text-purple-200 transition-colors font-medium">
                   New Ticket
                 </Link>
+                <Link to="/account-settings" className="text-white hover:text-purple-200 transition-colors font-medium">
+                  Account Settings
+                </Link>
                 <span className="text-purple-200 text-sm">
                   Welcome, {customer?.first_name}
                 </span>
@@ -122,6 +125,13 @@ const Navbar = () => {
                   onClick={closeMobileMenu}
                 >
                   New Ticket
+                </Link>
+                <Link 
+                  to="/account-settings" 
+                  className="block text-white hover:text-purple-200 transition-colors font-medium py-2"
+                  onClick={closeMobileMenu}
+                >
+                  Account Settings
                 </Link>
                 <button 
                   onClick={handleLogout} 

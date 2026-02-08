@@ -8,7 +8,11 @@ import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
-  onAuthStateChanged
+  onAuthStateChanged,
+  sendEmailVerification,
+  sendPasswordResetEmail,
+  updateEmail,
+  reload
 } from 'firebase/auth';
 import { auth } from '../config/firebase';
 import { customerAPI } from '../services/api.service';
@@ -70,7 +74,21 @@ export const AuthProvider = ({ children }) => {
       await customerAPI.register(userData);
       
       // Auto-login after registration
-      return await login(userData.email, userData.password);
+      const loginResult = await login(userData.email, userData.password);
+      
+      if (loginResult.success) {
+        // Send email verification after successful login
+        const verificationResult = await sendVerificationEmail();
+        if (verificationResult.success) {
+          return { 
+            success: true, 
+            message: 'Registration successful! Please check your email to verify your account.',
+            requiresEmailVerification: true 
+          };
+        }
+      }
+      
+      return loginResult;
     } catch (error) {
       return {
         success: false,
@@ -89,6 +107,73 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const sendVerificationEmail = async () => {
+    try {
+      if (user && !user.emailVerified) {
+        await sendEmailVerification(user);
+        return { success: true, message: 'Verification email sent successfully' };
+      }
+      return { success: false, error: 'User not found or already verified' };
+    } catch (error) {
+      return {
+        success: false,
+        error: error.code === 'auth/too-many-requests' 
+          ? 'Too many requests. Please try again later.'
+          : 'Failed to send verification email'
+      };
+    }
+  };
+
+  const resetPassword = async (email) => {
+    try {
+      await sendPasswordResetEmail(auth, email);
+      return { success: true, message: 'Password reset email sent successfully' };
+    } catch (error) {
+      const errorMessage = error.code === 'auth/user-not-found'
+        ? 'No account found with this email address'
+        : error.code === 'auth/invalid-email'
+        ? 'Invalid email address'
+        : 'Failed to send password reset email';
+      
+      return { success: false, error: errorMessage };
+    }
+  };
+
+  const changeEmail = async (newEmail) => {
+    try {
+      if (!user) {
+        return { success: false, error: 'User not authenticated' };
+      }
+      
+      await updateEmail(user, newEmail);
+      await reload(user); // Refresh user data
+      
+      return { success: true, message: 'Email updated successfully. Please check your new email for verification.' };
+    } catch (error) {
+      const errorMessage = error.code === 'auth/email-already-in-use'
+        ? 'This email is already in use'
+        : error.code === 'auth/invalid-email'
+        ? 'Invalid email address'
+        : error.code === 'auth/requires-recent-login'
+        ? 'Please re-authenticate and try again'
+        : 'Failed to update email';
+      
+      return { success: false, error: errorMessage };
+    }
+  };
+
+  const refreshUser = async () => {
+    try {
+      if (user) {
+        await reload(user);
+        // Force re-render by updating state
+        setUser({ ...user });
+      }
+    } catch (error) {
+      console.error('Error refreshing user:', error);
+    }
+  };
+
   const value = {
     customer,
     user,
@@ -96,7 +181,12 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
+    sendVerificationEmail,
+    resetPassword,
+    changeEmail,
+    refreshUser,
     isAuthenticated: !!user,
+    isEmailVerified: user?.emailVerified || false,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
