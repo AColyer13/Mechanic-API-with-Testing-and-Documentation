@@ -55,6 +55,7 @@ router.post('/', async (req, res) => {
       last_name,
       email,
       phone: phone || null,
+      phone_verified: false,
       city: city || null,
       state: state || null,
       uid: firebaseUser.uid // Link to Firebase Auth user
@@ -153,7 +154,7 @@ router.put('/:id', verifyToken, async (req, res) => {
       return res.status(404).json({ error: 'Customer not found' });
     }
     
-    const { first_name, last_name, email, phone, city, state } = req.body;
+    const { first_name, last_name, email, phone, city, state, phone_verified } = req.body;
     
     // Build update object (only include provided fields)
     const updateData = {};
@@ -161,6 +162,7 @@ router.put('/:id', verifyToken, async (req, res) => {
     if (last_name) updateData.last_name = last_name;
     if (email) updateData.email = email;
     if (phone !== undefined) updateData.phone = phone;
+    if (phone_verified !== undefined) updateData.phone_verified = phone_verified;
     if (city !== undefined) updateData.city = city;
     if (state !== undefined) updateData.state = state;
     

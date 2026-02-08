@@ -19,6 +19,12 @@ import {
   EmailAuthProvider,
   linkWithCredential
 } from 'firebase/auth';
+import {
+  RecaptchaVerifier,
+  PhoneAuthProvider,
+  PhoneMultiFactorGenerator,
+  multiFactor
+} from 'firebase/auth';
 import { auth } from '../config/firebase';
 import { customerAPI } from '../services/api.service';
 
@@ -348,6 +354,57 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Start phone MFA enrollment: sends verification SMS and returns an id for verification
+  const startPhoneEnrollment = async (phoneNumber) => {
+    try {
+      if (!user) return { success: false, error: 'User not authenticated' };
+
+      // Create/invisible reCAPTCHA
+      if (typeof window !== 'undefined') {
+        if (!window.recaptchaVerifier) {
+          window.recaptchaVerifier = new RecaptchaVerifier('recaptcha-container', { size: 'invisible' }, auth);
+        }
+      }
+
+      const mfa = multiFactor(user);
+      const mfaSession = await mfa.getSession();
+
+      const phoneProvider = new PhoneAuthProvider(auth);
+      const verificationId = await phoneProvider.verifyPhoneNumber({ phoneNumber, session: mfaSession }, window.recaptchaVerifier);
+
+      return { success: true, verificationId };
+    } catch (error) {
+      console.error('Error starting phone enrollment:', error);
+      return { success: false, error: error.message || 'Failed to send verification code' };
+    }
+  };
+
+  // Complete phone MFA enrollment using the verificationId + code
+  const finalizePhoneEnrollment = async (verificationId, verificationCode, displayName) => {
+    try {
+      if (!user) return { success: false, error: 'User not authenticated' };
+
+      const phoneCredential = PhoneAuthProvider.credential(verificationId, verificationCode);
+      const assertion = PhoneMultiFactorGenerator.assertion(phoneCredential);
+
+      const mfa = multiFactor(user);
+      await mfa.enroll(assertion, displayName || 'Phone');
+
+      // Update backend customer record to mark phone as verified
+      try {
+        await customerAPI.update(user.uid, { phone: user.phoneNumber || null, phone_verified: true });
+        await refreshCustomer();
+      } catch (err) {
+        console.warn('Failed to update customer phone_verified:', err);
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('Error finalizing phone enrollment:', error);
+      return { success: false, error: error.message || 'Failed to verify code' };
+    }
+  };
+
   const value = {
     customer,
     user,
@@ -363,6 +420,8 @@ export const AuthProvider = ({ children }) => {
     changeEmail,
     refreshUser,
     refreshCustomer,
+    startPhoneEnrollment,
+    finalizePhoneEnrollment,
     isAuthenticated: !!user,
     isEmailVerified: user?.emailVerified || false,
   };

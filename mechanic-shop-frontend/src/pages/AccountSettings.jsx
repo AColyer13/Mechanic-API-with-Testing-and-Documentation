@@ -8,7 +8,7 @@ import { useAuth } from '../context/AuthContext';
 import { customerAPI } from '../services/api.service';
 
 const AccountSettings = () => {
-  const { user, customer, changeEmail, sendVerificationEmail, refreshUser, refreshCustomer } = useAuth();
+  const { user, customer, changeEmail, sendVerificationEmail, refreshUser, refreshCustomer, startPhoneEnrollment, finalizePhoneEnrollment } = useAuth();
   const [profileForm, setProfileForm] = useState({
     first_name: '',
     last_name: '',
@@ -23,6 +23,12 @@ const AccountSettings = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [mfaSent, setMfaSent] = useState(false);
+  const [verificationId, setVerificationId] = useState(null);
+  const [verificationCode, setVerificationCode] = useState('');
+  const [mfaLoading, setMfaLoading] = useState(false);
+  const [mfaMessage, setMfaMessage] = useState('');
+  const [mfaError, setMfaError] = useState('');
 
   const handleEmailChange = async (e) => {
     e.preventDefault();
@@ -162,7 +168,18 @@ const AccountSettings = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Phone
                 </label>
-                <p className="text-gray-900">{customer?.phone || 'Not provided'}</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-gray-900">{customer?.phone || 'Not provided'}</p>
+                  {customer?.phone_verified ? (
+                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                      Verified
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                      Unverified
+                    </span>
+                  )}
+                </div>
               </div>
 
               <div>
@@ -172,6 +189,129 @@ const AccountSettings = () => {
                 <p className="text-gray-900">{customer?.address || 'Not provided'}</p>
               </div>
             </div>
+          </div>
+
+          {/* Multi-factor Authentication (Optional) */}
+          <div className="bg-white rounded-xl shadow-md p-4 md:p-6 lg:p-8">
+            <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-4">Two-Step Verification (Optional)</h2>
+
+            <p className="text-sm text-gray-700 mb-3">Enable SMS-based two-step verification for added account security. This is optional.</p>
+
+            {mfaError && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-3">{mfaError}</div>}
+            {mfaMessage && <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded mb-3">{mfaMessage}</div>}
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Phone for 2-step verification</label>
+                <input
+                  type="text"
+                  value={profileForm.phone}
+                  onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  placeholder="+1 555 555 5555"
+                />
+              </div>
+
+              <div className="flex items-end">
+                <button
+                  onClick={async () => {
+                    setMfaError('');
+                    setMfaMessage('');
+                    setMfaLoading(true);
+                    try {
+                      const res = await startPhoneEnrollment(profileForm.phone);
+                      if (res.success) {
+                        setVerificationId(res.verificationId);
+                        setMfaSent(true);
+                        setMfaMessage('Verification code sent');
+                      } else {
+                        setMfaError(res.error || 'Failed to send verification code');
+                      }
+                    } catch (err) {
+                      setMfaError(err.message || 'Failed to send verification code');
+                    }
+                    setMfaLoading(false);
+                  }}
+                  disabled={mfaLoading}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium disabled:opacity-50"
+                >
+                  {mfaLoading ? 'Sending...' : 'Send verification code'}
+                </button>
+              </div>
+            </div>
+
+            {mfaSent && (
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  setMfaError('');
+                  setMfaMessage('');
+                  setMfaLoading(true);
+
+                  try {
+                    const res = await finalizePhoneEnrollment(verificationId, verificationCode, `${profileForm.first_name} ${profileForm.last_name}`);
+                    if (res.success) {
+                      // Ensure backend marks phone_verified and stores phone
+                      try {
+                        await customerAPI.update(customer.id, { phone: profileForm.phone, phone_verified: true });
+                        await refreshCustomer();
+                      } catch (err) {
+                        console.warn('Backend update failed after MFA enroll', err);
+                      }
+
+                      setMfaMessage('Phone verified and two-step verification enabled');
+                      setMfaSent(false);
+                      setVerificationCode('');
+                    } else {
+                      setMfaError(res.error || 'Verification failed');
+                    }
+                  } catch (err) {
+                    setMfaError(err.message || 'Verification failed');
+                  }
+
+                  setMfaLoading(false);
+                }}
+                className="space-y-4"
+              >
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Enter verification code</label>
+                  <input
+                    type="text"
+                    value={verificationCode}
+                    onChange={(e) => setVerificationCode(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    placeholder="123456"
+                    required
+                  />
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    type="submit"
+                    disabled={mfaLoading}
+                    className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded font-medium disabled:opacity-50"
+                  >
+                    {mfaLoading ? 'Verifying...' : 'Verify and enable 2-step'}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMfaSent(false);
+                      setVerificationId(null);
+                      setVerificationCode('');
+                      setMfaMessage('');
+                      setMfaError('');
+                    }}
+                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            )}
+
+            <div id="recaptcha-container" />
           </div>
           {/* Edit Account Information */}
           <div className="bg-white rounded-xl shadow-md p-4 md:p-6 lg:p-8">
