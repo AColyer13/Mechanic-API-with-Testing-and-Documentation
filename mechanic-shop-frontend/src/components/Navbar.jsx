@@ -31,7 +31,7 @@ const Navbar = () => {
             className="text-white text-xl md:text-2xl font-bold hover:text-purple-200 transition-colors flex items-center gap-2"
             onClick={closeMobileMenu}
           >
-            <span className="text-2xl">🔧</span>
+            <span className="text-2xl">�</span>
             <span className="hidden sm:inline">Mechanic Shop</span>
             <span className="sm:hidden">MS</span>
           </Link>
