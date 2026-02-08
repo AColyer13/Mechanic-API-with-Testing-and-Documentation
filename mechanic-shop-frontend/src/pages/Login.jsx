@@ -15,7 +15,7 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   
-  const { login, loginWithGoogle } = useAuth();
+  const { login, loginWithGoogle, accountMergePrompt, handleMergeAccountsYes, handleMergeAccountsNo } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -50,11 +50,13 @@ const Login = () => {
     
     if (result.success) {
       navigate('/dashboard');
+    } else if (result.requiresAccountMerge) {
+      // Modal will show automatically via accountMergePrompt state
+      setLoading(false);
     } else {
       setError(result.error);
+      setLoading(false);
     }
-    
-    setLoading(false);
   };
 
   return (
@@ -144,6 +146,82 @@ const Login = () => {
           <Link to="/forgot-password">Forgot your password?</Link>
         </p>
       </div>
+
+      {accountMergePrompt && (
+        <div className="modal-overlay" style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div className="modal-content" style={{
+            background: 'white',
+            padding: '2rem',
+            borderRadius: '10px',
+            boxShadow: '0 10px 40px rgba(0, 0, 0, 0.3)',
+            maxWidth: '400px',
+            width: '90%',
+            textAlign: 'center'
+          }}>
+            <h3 style={{ marginBottom: '1rem', color: '#2c3e50' }}>Merge Accounts?</h3>
+            <p style={{ marginBottom: '1.5rem', color: '#7f8c8d', lineHeight: '1.6' }}>
+              An account with email <strong>"{accountMergePrompt.email}"</strong> already exists. 
+              Would you like to merge your Google account with your existing email/password account?
+            </p>
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
+              <button
+                onClick={async () => {
+                  await handleMergeAccountsNo();
+                  setError('Account merge cancelled');
+                  setLoading(false);
+                }}
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  backgroundColor: '#ecf0f1',
+                  color: '#2c3e50',
+                  border: 'none',
+                  borderRadius: '4px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s'
+                }}
+                onMouseEnter={(e) => e.target.style.backgroundColor = '#bdc3c7'}
+                onMouseLeave={(e) => e.target.style.backgroundColor = '#ecf0f1'}
+              >
+                No, Keep Separate
+              </button>
+              <button
+                onClick={async () => {
+                  await handleMergeAccountsYes();
+                  setError('Please login with your email and password to complete the merge');
+                  setFormData({ email: accountMergePrompt.email, password: '' });
+                  setLoading(false);
+                }}
+                style={{
+                  padding: '0.75rem 1.5rem',
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s'
+                }}
+                onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
+                onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
+              >
+                Yes, Merge Accounts
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
