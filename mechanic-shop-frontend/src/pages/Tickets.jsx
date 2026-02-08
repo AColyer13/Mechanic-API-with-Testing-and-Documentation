@@ -90,12 +90,6 @@ const Tickets = () => {
 
       <div className="filter-buttons">
         <button 
-          className={filter === 'all' ? 'active' : ''}
-          onClick={() => setFilter('all')}
-        >
-          All ({tickets.length})
-        </button>
-        <button 
           className={filter === 'Open' ? 'active' : ''}
           onClick={() => setFilter('Open')}
         >
@@ -112,6 +106,12 @@ const Tickets = () => {
           onClick={() => setFilter('Completed')}
         >
           Completed ({tickets.filter(t => t.status === 'Completed').length})
+        </button>
+        <button 
+          className={filter === 'all' ? 'active' : ''}
+          onClick={() => setFilter('all')}
+        >
+          All ({tickets.length})
         </button>
       </div>
 

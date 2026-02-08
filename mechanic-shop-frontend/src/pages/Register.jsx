@@ -14,7 +14,8 @@ const Register = () => {
     email: '',
     password: '',
     phone: '',
-    address: '',
+    city: '',
+    state: '',
   });
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
@@ -143,15 +144,28 @@ const Register = () => {
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="address">Address</label>
-              <textarea
-                id="address"
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
-                rows="3"
-              />
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="city">City</label>
+                <input
+                  type="text"
+                  id="city"
+                  name="city"
+                  value={formData.city}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="state">State</label>
+                <input
+                  type="text"
+                  id="state"
+                  name="state"
+                  value={formData.state}
+                  onChange={handleChange}
+                />
+              </div>
             </div>
 
             <button type="submit" className="btn-primary" disabled={loading}>
