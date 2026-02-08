@@ -13,7 +13,6 @@ const Register = () => {
     last_name: '',
     email: '',
     password: '',
-    confirmPassword: '',
     phone: '',
     city: '',
     state: '',
@@ -21,61 +20,23 @@ const Register = () => {
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  const [passwordValidation, setPasswordValidation] = useState({
-    minLength: false,
-    hasSpecial: false,
-    passwordsMatch: false,
-  });
   
   const { register, loginWithGoogle } = useAuth();
   const navigate = useNavigate();
 
-  // Password validation rules
-  const validatePassword = (password, confirmPassword) => {
-    const hasMinLength = password.length >= 6;
-    const hasSpecialChar = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
-    const matches = password === confirmPassword && password.length > 0;
-    
-    setPasswordValidation({
-      minLength: hasMinLength,
-      hasSpecial: hasSpecialChar,
-      passwordsMatch: matches,
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
     });
   };
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    const newFormData = {
-      ...formData,
-      [name]: value,
-    };
-    setFormData(newFormData);
-    
-    // Validate password on change
-    if (name === 'password' || name === 'confirmPassword') {
-      validatePassword(
-        name === 'password' ? value : formData.password,
-        name === 'confirmPassword' ? value : formData.confirmPassword
-      );
-    }
-  };
-
-  const isPasswordValid = passwordValidation.minLength && passwordValidation.hasSpecial && passwordValidation.passwordsMatch;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    
-    if (!isPasswordValid) {
-      setError('Please ensure password meets all requirements and confirmation matches');
-      return;
-    }
-    
     setLoading(true);
 
-    // Don't send confirmPassword to backend
-    const { confirmPassword, ...submitData } = formData;
-    const result = await register(submitData);
+    const result = await register(formData);
     
     if (result.success) {
       if (result.requiresEmailVerification) {
@@ -170,33 +131,6 @@ const Register = () => {
                 onChange={handleChange}
                 required
               />
-              <div className="password-requirements">
-                <div className={`req-item ${passwordValidation.minLength ? 'met' : ''}`}>
-                  <span className="req-check">{passwordValidation.minLength ? '✓' : '○'}</span>
-                  At least 6 characters
-                </div>
-                <div className={`req-item ${passwordValidation.hasSpecial ? 'met' : ''}`}>
-                  <span className="req-check">{passwordValidation.hasSpecial ? '✓' : '○'}</span>
-                  One special character (!@#$%^&* etc)
-                </div>
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="confirmPassword">Confirm Password *</label>
-              <input
-                type="password"
-                id="confirmPassword"
-                name="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required
-              />
-              {formData.confirmPassword && (
-                <div className={`password-match ${passwordValidation.passwordsMatch ? 'match' : 'no-match'}`}>
-                  {passwordValidation.passwordsMatch ? '✓ Passwords match' : '✗ Passwords do not match'}
-                </div>
-              )}
             </div>
 
             <div className="form-group">
@@ -234,7 +168,7 @@ const Register = () => {
               </div>
             </div>
 
-            <button type="submit" className="btn-primary" disabled={loading || !isPasswordValid}>
+            <button type="submit" className="btn-primary" disabled={loading}>
               {loading ? 'Registering...' : 'Register'}
             </button>
           </form>
