@@ -4,7 +4,7 @@
  */
 
 // Use environment variable or default to local emulator
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/mechanic-shop-api-functions/us-central1/api';
+export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/mechanicshopapi/us-central1/api';
 
 export const API_ENDPOINTS = {
   // Customer endpoints
