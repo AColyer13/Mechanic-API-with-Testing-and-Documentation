@@ -12,7 +12,7 @@ const Tickets = () => {
   const { customer } = useAuth();
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState('Open');
   const [updatingId, setUpdatingId] = useState(null);
 
   useEffect(() => {
