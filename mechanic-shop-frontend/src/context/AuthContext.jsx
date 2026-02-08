@@ -107,23 +107,22 @@ export const AuthProvider = ({ children }) => {
         // Profile exists, login successful
         return { success: true };
       } catch (error) {
-        // Profile doesn't exist, create one from Google data
-        const userData = {
+        // Profile doesn't exist - need to ask user to complete it
+        // Sign them out for now and ask them to complete registration
+        await signOut(auth);
+        
+        const googleData = {
           first_name: firebaseUser.displayName?.split(' ')[0] || 'User',
           last_name: firebaseUser.displayName?.split(' ').slice(1).join(' ') || '',
           email: firebaseUser.email,
-          phone: null,
-          address: null,
         };
         
-        try {
-          await customerAPI.register(userData);
-          return { success: true };
-        } catch (registrationError) {
-          console.error('Error creating profile after Google login:', registrationError);
-          // Profile creation failed but user is logged in, so return success
-          return { success: true };
-        }
+        return {
+          success: false,
+          requiresProfileCompletion: true,
+          googleData,
+          error: 'Please complete your profile to finish registration.'
+        };
       }
     } catch (error) {
       if (error.code === 'auth/account-exists-with-different-credential') {

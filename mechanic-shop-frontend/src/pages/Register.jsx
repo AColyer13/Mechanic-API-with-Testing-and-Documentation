@@ -13,14 +13,17 @@ const Register = () => {
     last_name: '',
     email: '',
     password: '',
+    confirmPassword: '',
     phone: '',
-    address: '',
+    city: '',
+    state: '',
   });
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [requiresGoogleLink, setRequiresGoogleLink] = useState(false);
   const [mergeRequired, setMergeRequired] = useState(false);
+  const [googleSignupData, setGoogleSignupData] = useState(null);
   
   const { register, loginWithGoogle, linkPasswordToGoogle, mergeGoogleWithPassword } = useAuth();
   const navigate = useNavigate();
@@ -40,7 +43,18 @@ const Register = () => {
     setMergeRequired(false);
     setLoading(true);
 
-    const result = await register(formData);
+    // Validate password confirmation
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      setLoading(false);
+      return;
+    }
+
+    // Remove confirmPassword before sending to API
+    const registerData = { ...formData };
+    delete registerData.confirmPassword;
+
+    const result = await register(registerData);
     
     if (result.success) {
       if (result.requiresEmailVerification) {
@@ -76,6 +90,10 @@ const Register = () => {
     } else if (result.requiresAccountMerge) {
       setMergeRequired(true);
       setError(result.error);
+    } else if (result.requiresProfileCompletion) {
+      // Google signup - need to fill in password, phone, city, state
+      setGoogleSignupData(result.googleData);
+      setError('Please complete your profile to finish registration.');
     } else {
       setError(result.error);
     }
@@ -119,6 +137,50 @@ const Register = () => {
     setLoading(false);
   };
 
+  const handleCompleteGoogleSignup = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccessMessage('');
+    setLoading(true);
+
+    // Validate password confirmation
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      setLoading(false);
+      return;
+    }
+
+    // Validate required fields
+    if (!formData.password || !formData.phone || !formData.city || !formData.state) {
+      setError('Please fill in all required fields');
+      setLoading(false);
+      return;
+    }
+
+    // Create registration data from Google data + completed fields
+    const completeData = {
+      first_name: googleSignupData.first_name,
+      last_name: googleSignupData.last_name,
+      email: googleSignupData.email,
+      password: formData.password,
+      phone: formData.phone,
+      city: formData.city,
+      state: formData.state,
+    };
+
+    // Call register
+    const result = await register(completeData);
+
+    if (result.success) {
+      setSuccessMessage('Registration complete! Redirecting...');
+      setTimeout(() => navigate('/dashboard'), 1500);
+    } else {
+      setError(result.error);
+    }
+
+    setLoading(false);
+  };
+
   return (
     <div className="auth-container">
       <div className="auth-card">
@@ -126,6 +188,135 @@ const Register = () => {
         
         {successMessage ? (
           <div className="success-message">{successMessage}</div>
+        ) : googleSignupData ? (
+          <>
+            <form onSubmit={handleCompleteGoogleSignup}>
+              <div className="error-message" style={{ marginBottom: '1rem' }}>
+                Complete your profile to finish Google registration
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="display_first_name">First Name</label>
+                <input
+                  type="text"
+                  id="display_first_name"
+                  value={googleSignupData.first_name}
+                  disabled
+                  style={{ backgroundColor: '#f5f5f5', cursor: 'not-allowed' }}
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="display_last_name">Last Name</label>
+                <input
+                  type="text"
+                  id="display_last_name"
+                  value={googleSignupData.last_name}
+                  disabled
+                  style={{ backgroundColor: '#f5f5f5', cursor: 'not-allowed' }}
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="display_email">Email</label>
+                <input
+                  type="email"
+                  id="display_email"
+                  value={googleSignupData.email}
+                  disabled
+                  style={{ backgroundColor: '#f5f5f5', cursor: 'not-allowed' }}
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="google_password">Password *</label>
+                <input
+                  type="password"
+                  id="google_password"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="google_confirmPassword">Confirm Password *</label>
+                <input
+                  type="password"
+                  id="google_confirmPassword"
+                  name="confirmPassword"
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="google_phone">Phone *</label>
+                <input
+                  type="tel"
+                  id="google_phone"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="form-row-three">
+                <div className="form-group">
+                  <label htmlFor="google_city">City *</label>
+                  <input
+                    type="text"
+                    id="google_city"
+                    name="city"
+                    value={formData.city}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label htmlFor="google_state">State *</label>
+                  <input
+                    type="text"
+                    id="google_state"
+                    name="state"
+                    value={formData.state}
+                    onChange={handleChange}
+                    maxLength="2"
+                    placeholder="e.g., CA"
+                    required
+                  />
+                </div>
+              </div>
+
+              {error && <div className="error-message">{error}</div>}
+
+              <button type="submit" className="btn-primary" disabled={loading}>
+                {loading ? 'Completing Registration...' : 'Complete Registration'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setGoogleSignupData(null)}
+                disabled={loading}
+                style={{
+                  width: '100%',
+                  padding: '0.75rem',
+                  marginTop: '0.75rem',
+                  backgroundColor: '#f5f5f5',
+                  color: '#666',
+                  border: '1px solid #ddd',
+                  borderRadius: '4px',
+                  cursor: 'pointer'
+                }}
+              >
+                Cancel
+              </button>
+            </form>
+          </>
         ) : (
           <>
             <form onSubmit={handleSubmit}>
@@ -212,6 +403,18 @@ const Register = () => {
             </div>
 
             <div className="form-group">
+              <label htmlFor="confirmPassword">Confirm Password *</label>
+              <input
+                type="password"
+                id="confirmPassword"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                required
+              />
+            </div>
+
+            <div className="form-group">
               <label htmlFor="phone">Phone</label>
               <input
                 type="tel"
@@ -222,15 +425,30 @@ const Register = () => {
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="address">Address</label>
-              <textarea
-                id="address"
-                name="address"
-                value={formData.address}
-                onChange={handleChange}
-                rows="3"
-              />
+            <div className="form-row-three">
+              <div className="form-group">
+                <label htmlFor="city">City</label>
+                <input
+                  type="text"
+                  id="city"
+                  name="city"
+                  value={formData.city}
+                  onChange={handleChange}
+                />
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="state">State</label>
+                <input
+                  type="text"
+                  id="state"
+                  name="state"
+                  value={formData.state}
+                  onChange={handleChange}
+                  maxLength="2"
+                  placeholder="e.g., CA"
+                />
+              </div>
             </div>
 
             <button type="submit" className="btn-primary" disabled={loading}>

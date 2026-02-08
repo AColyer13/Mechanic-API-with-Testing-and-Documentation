@@ -25,7 +25,7 @@ const router = express.Router();
  */
 router.post('/', async (req, res) => {
   try {
-    const { first_name, last_name, email, password, phone, address } = req.body;
+    const { first_name, last_name, email, password, phone, city, state } = req.body;
     
     // Validation
     if (!first_name || !last_name || !email || !password) {
@@ -55,7 +55,8 @@ router.post('/', async (req, res) => {
       last_name,
       email,
       phone: phone || null,
-      address: address || null,
+      city: city || null,
+      state: state || null,
       uid: firebaseUser.uid // Link to Firebase Auth user
     };
     
@@ -152,7 +153,7 @@ router.put('/:id', verifyToken, async (req, res) => {
       return res.status(404).json({ error: 'Customer not found' });
     }
     
-    const { first_name, last_name, email, phone, address } = req.body;
+    const { first_name, last_name, email, phone, city, state } = req.body;
     
     // Build update object (only include provided fields)
     const updateData = {};
@@ -160,7 +161,8 @@ router.put('/:id', verifyToken, async (req, res) => {
     if (last_name) updateData.last_name = last_name;
     if (email) updateData.email = email;
     if (phone !== undefined) updateData.phone = phone;
-    if (address !== undefined) updateData.address = address;
+    if (city !== undefined) updateData.city = city;
+    if (state !== undefined) updateData.state = state;
     
     if (Object.keys(updateData).length === 0) {
       return res.status(400).json({ error: 'No fields to update' });
