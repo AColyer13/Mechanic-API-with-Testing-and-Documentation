@@ -3,20 +3,23 @@
  * Users must verify their email before accessing the app
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { customerAPI } from '../services/api.service';
 import { auth } from '../config/firebase';
 import './Auth.css';
+import { useNavigate } from 'react-router-dom';
 
 const VerifyEmail = () => {
   const { user, isEmailVerified, sendVerificationEmail, refreshUser } = useAuth();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [cooldown, setCooldown] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [timeLeft, setTimeLeft] = useState(259200); // 3 days in seconds
+  const redirectTimerRef = useRef(null);
 
   useEffect(() => {
     // Check if email is verified every 3 seconds
@@ -74,6 +77,10 @@ const VerifyEmail = () => {
       // Account deleted successfully, logout user
       await auth.signOut();
       setMessage('Account deleted successfully');
+      // redirect to home after a short delay so user sees the success message
+      redirectTimerRef.current = setTimeout(() => {
+        navigate('/');
+      }, 3000);
     } catch (err) {
       const backendError = err.response?.data?.error || 'Failed to delete account';
       setError(backendError);
@@ -93,6 +100,15 @@ const VerifyEmail = () => {
   if (isEmailVerified) {
     return null; // Redirect happens in ProtectedRoute
   }
+
+  // cleanup redirect timer if component unmounts
+  useEffect(() => {
+    return () => {
+      if (redirectTimerRef.current) {
+        clearTimeout(redirectTimerRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div className="auth-container">

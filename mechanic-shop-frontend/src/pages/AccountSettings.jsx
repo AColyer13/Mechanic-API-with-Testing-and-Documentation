@@ -23,38 +23,42 @@ const AccountSettings = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  // Separate states for the Change Email form to avoid cross-form message/display loops
+  const [emailLoading, setEmailLoading] = useState(false);
+  const [emailMessage, setEmailMessage] = useState('');
+  const [emailError, setEmailError] = useState('');
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   const handleEmailChange = async (e) => {
     e.preventDefault();
-    setError('');
-    setMessage('');
-    setLoading(true);
+    setEmailError('');
+    setEmailMessage('');
+    setEmailLoading(true);
 
     if (emailForm.newEmail !== emailForm.confirmEmail) {
-      setError('Emails do not match');
-      setLoading(false);
+      setEmailError('Emails do not match');
+      setEmailLoading(false);
       return;
     }
 
     if (emailForm.newEmail === user.email) {
-      setError('New email must be different from current email');
-      setLoading(false);
+      setEmailError('New email must be different from current email');
+      setEmailLoading(false);
       return;
     }
 
     const result = await changeEmail(emailForm.newEmail);
 
     if (result.success) {
-      setMessage(result.message);
+      setEmailMessage(result.message);
       setEmailForm({ newEmail: '', confirmEmail: '' });
       await refreshUser(); // Refresh user data
     } else {
-      setError(result.error);
+      setEmailError(result.error);
     }
 
-    setLoading(false);
+    setEmailLoading(false);
   };
 
   const handleResendVerification = async () => {
@@ -208,17 +212,17 @@ const AccountSettings = () => {
             </h2>
 
             <form onSubmit={handleProfileUpdate} className="space-y-4">
-              {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-                  {error}
-                </div>
-              )}
+                {error && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                    {error}
+                  </div>
+                )}
 
-              {message && (
-                <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
-                  {message}
-                </div>
-              )}
+                {message && (
+                  <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
+                    {message}
+                  </div>
+                )}
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -316,17 +320,17 @@ const AccountSettings = () => {
             </h2>
 
             <form onSubmit={handleEmailChange} className="space-y-4">
-              {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-                  {error}
-                </div>
-              )}
+                {emailError && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                    {emailError}
+                  </div>
+                )}
 
-              {message && (
-                <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
-                  {message}
-                </div>
-              )}
+                {emailMessage && (
+                  <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
+                    {emailMessage}
+                  </div>
+                )}
 
               <div>
                 <label htmlFor="newEmail" className="block text-sm font-medium text-gray-700 mb-1">
@@ -367,10 +371,10 @@ const AccountSettings = () => {
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={emailLoading}
                 className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded font-medium disabled:opacity-50"
               >
-                {loading ? 'Updating...' : 'Change Email'}
+                {emailLoading ? 'Updating...' : 'Change Email'}
               </button>
             </form>
           </div>
