@@ -28,10 +28,29 @@ jobs:
           cd mechanic-shop-backend
           npm ci
 
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Start Firestore Emulator
+        working-directory: mechanic-shop-backend
+        run: |
+          firebase emulators:start --only firestore > /tmp/emulator.log 2>&1 &
+          echo $! > /tmp/emulator.pid
+          echo "Waiting for Firestore emulator to start..."
+          sleep 8
+
       - name: Run backend tests
         run: |
           cd mechanic-shop-backend
           npm test
+
+      - name: Stop emulators
+        if: always()
+        run: |
+          if [ -f /tmp/emulator.pid ]; then
+            kill $(cat /tmp/emulator.pid) || true
+          fi
+          sleep 2
 
   # Frontend Build & Test
   frontend-test:
