@@ -34,8 +34,8 @@ export const AuthProvider = ({ children }) => {
       if (firebaseUser) {
         // User is signed in, load customer profile from Firestore
         try {
-          const customerData = await customerAPI.getById(firebaseUser.uid);
-          setCustomer(customerData);
+          const response = await customerAPI.getById(firebaseUser.uid);
+          setCustomer(response.data);
         } catch (error) {
           console.error('Error loading customer profile:', error);
         }
