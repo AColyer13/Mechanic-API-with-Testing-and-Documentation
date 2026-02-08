@@ -234,10 +234,18 @@ router.delete('/:id', verifyToken, async (req, res) => {
     // Delete customer
     await deleteDocument(COLLECTIONS.CUSTOMERS, customerId);
     
-    // TODO: Optional - Also delete all service tickets for this customer
+    // Delete associated service tickets
     const tickets = await getTicketsByCustomer(customerId);
     for (const ticket of tickets) {
       await deleteDocument(COLLECTIONS.SERVICE_TICKETS, ticket.id);
+    }
+    
+    // Delete Firebase Auth user
+    try {
+      await admin.auth().deleteUser(customerId);
+    } catch (authError) {
+      console.warn('Failed to delete Firebase Auth user:', authError);
+      // Continue with response even if auth deletion fails
     }
     
     return res.status(200).json({ message: 'Customer deleted successfully' });

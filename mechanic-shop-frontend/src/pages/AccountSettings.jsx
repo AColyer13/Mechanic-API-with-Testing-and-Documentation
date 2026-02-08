@@ -29,6 +29,8 @@ const AccountSettings = () => {
   const [mfaLoading, setMfaLoading] = useState(false);
   const [mfaMessage, setMfaMessage] = useState('');
   const [mfaError, setMfaError] = useState('');
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const handleEmailChange = async (e) => {
     e.preventDefault();
@@ -147,6 +149,20 @@ const AccountSettings = () => {
     }
 
     setLoading(false);
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleteLoading(true);
+    try {
+      await customerAPI.delete(customer.id);
+      // Account deleted successfully, logout user
+      window.location.href = '/login'; // Redirect to login page
+    } catch (err) {
+      const backendError = err.response?.data?.error || 'Failed to delete account';
+      setError(backendError);
+      setShowDeleteDialog(false);
+    }
+    setDeleteLoading(false);
   };
 
   return (
@@ -499,8 +515,64 @@ const AccountSettings = () => {
               </button>
             </form>
           </div>
+
+          {/* Delete Account */}
+          <div className="bg-white rounded-xl shadow-md p-4 md:p-6 lg:p-8">
+            <h2 className="text-xl md:text-2xl font-bold text-red-800 mb-4">
+              Danger Zone
+            </h2>
+
+            <div className="bg-red-50 border border-red-200 rounded p-4">
+              <h3 className="text-lg font-semibold text-red-800 mb-2">Delete Account</h3>
+              <p className="text-red-700 mb-4">
+                Once you delete your account, there is no going back. This will permanently delete your account
+                and remove all your data from our servers, including all service tickets and personal information.
+              </p>
+
+              <button
+                onClick={() => setShowDeleteDialog(true)}
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded font-medium"
+              >
+                Delete Account
+              </button>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Delete Account Confirmation Dialog */}
+      {showDeleteDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Are you sure you want to delete your account?
+            </h3>
+            
+            <p className="text-gray-600 mb-6">
+              This action cannot be undone. This will permanently delete your account and remove all your data from our servers.
+            </p>
+
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setShowDeleteDialog(false)}
+                disabled={deleteLoading}
+                className="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              
+              <button
+                onClick={handleDeleteAccount}
+                disabled={deleteLoading}
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
+              >
+                {deleteLoading ? 'Deleting...' : 'Yes, Delete Account'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div id="recaptcha-container" />
     </div>
   );
