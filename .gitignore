@@ -2,6 +2,9 @@
 .env
 .env.local
 .env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
 
 # Python
 __pycache__/
@@ -12,12 +15,16 @@ __pycache__/
 *.egg-info/
 dist/
 build/
+.pytest_cache/
+.python-version
 
 # Virtual Environment
 venv/
 .venv/
 ENV/
 env/
+env.bak/
+venv.bak/
 
 # Node.js
 node_modules/
@@ -29,16 +36,53 @@ lerna-debug.log*
 .npm
 .yarn
 .yarn-integrity
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Vite
+dist/
+dist-ssr/
+*.local
+.vite/
+
+# React/Frontend Build
+build/
+.cache/
+public/build/
+
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+.firebaserc
+
+# Testing
+.coverage
+htmlcov/
+coverage/
+*.lcov
+test-results/
+playwright-report/
+playwright/.cache/
+.nyc_output/
 
 # IDEs
 .vscode/
 .idea/
 *.swp
 *.swo
+*.sublime-project
+*.sublime-workspace
 
 # Logs
 logs/
 *.log
+pids/
+*.pid
+*.seed
+*.pid.lock
 
 # Database
 *.db
@@ -51,9 +95,13 @@ instance/
 Thumbs.db
 *.tmp
 *.temp
+Desktop.ini
+$RECYCLE.BIN/
 
-# Testing
-.coverage
-htmlcov/
-.pytest_cache/
-coverage/
+# Miscellaneous
+.eslintcache
+.parcel-cache/
+.next/
+out/
+.turbo/
+*.tsbuildinfo
