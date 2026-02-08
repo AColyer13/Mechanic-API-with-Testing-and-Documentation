@@ -176,11 +176,31 @@ router.put('/:id', verifyToken, async (req, res) => {
       }
     }
     
+    // Update Firestore customer document
     const updatedCustomer = await updateDocument(COLLECTIONS.CUSTOMERS, customerId, updateData);
-    
-    // Remove password
+
+    // If the user's name changed, mirror that change to Firebase Auth displayName
+    try {
+      if (updateData.first_name || updateData.last_name) {
+        const newFirst = updateData.first_name || existingCustomer.first_name || '';
+        const newLast = updateData.last_name || existingCustomer.last_name || '';
+        const newDisplayName = `${newFirst} ${newLast}`.trim();
+        if (newDisplayName) {
+          try {
+            await admin.auth().updateUser(customerId, { displayName: newDisplayName });
+          } catch (authUpdateErr) {
+            // Log and continue; Firestore profile remains source of truth for profile fields
+            console.warn('Failed to update Firebase Auth displayName:', authUpdateErr);
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('Name update check failed:', err);
+    }
+
+    // Remove password before returning
     delete updatedCustomer.password;
-    
+
     return res.status(200).json(updatedCustomer);
   } catch (error) {
     console.error('Error updating customer:', error);

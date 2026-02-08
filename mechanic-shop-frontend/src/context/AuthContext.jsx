@@ -330,6 +330,24 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const refreshCustomer = async () => {
+    try {
+      if (user) {
+        const response = await customerAPI.getById(user.uid);
+        const customerData = {
+          ...response.data,
+          id: user.uid
+        };
+        setCustomer(customerData);
+        return { success: true };
+      }
+      return { success: false };
+    } catch (error) {
+      console.error('Error refreshing customer:', error);
+      return { success: false };
+    }
+  };
+
   const value = {
     customer,
     user,
@@ -344,6 +362,7 @@ export const AuthProvider = ({ children }) => {
     resetPassword,
     changeEmail,
     refreshUser,
+    refreshCustomer,
     isAuthenticated: !!user,
     isEmailVerified: user?.emailVerified || false,
   };

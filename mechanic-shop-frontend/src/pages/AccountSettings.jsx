@@ -3,11 +3,19 @@
  * Allows users to manage their account settings including email changes
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { customerAPI } from '../services/api.service';
 
 const AccountSettings = () => {
-  const { user, customer, changeEmail, sendVerificationEmail, refreshUser } = useAuth();
+  const { user, customer, changeEmail, sendVerificationEmail, refreshUser, refreshCustomer } = useAuth();
+  const [profileForm, setProfileForm] = useState({
+    first_name: '',
+    last_name: '',
+    phone: '',
+    city: '',
+    state: ''
+  });
   const [emailForm, setEmailForm] = useState({
     newEmail: '',
     confirmEmail: '',
@@ -58,6 +66,51 @@ const AccountSettings = () => {
       setMessage(result.message);
     } else {
       setError(result.error);
+    }
+
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    if (customer) {
+      setProfileForm({
+        first_name: customer.first_name || '',
+        last_name: customer.last_name || '',
+        phone: customer.phone || '',
+        city: customer.city || '',
+        state: customer.state || ''
+      });
+    }
+  }, [customer]);
+
+  const handleProfileUpdate = async (e) => {
+    e.preventDefault();
+    setError('');
+    setMessage('');
+    setLoading(true);
+
+    if (!customer?.id) {
+      setError('No customer profile found');
+      setLoading(false);
+      return;
+    }
+
+    const updatePayload = {
+      first_name: profileForm.first_name,
+      last_name: profileForm.last_name,
+      phone: profileForm.phone,
+      city: profileForm.city,
+      state: profileForm.state
+    };
+
+    try {
+      const response = await customerAPI.update(customer.id, updatePayload);
+      setMessage('Profile updated successfully');
+      // Refresh profile in context
+      if (refreshCustomer) await refreshCustomer();
+    } catch (err) {
+      const backendError = err.response?.data?.error || 'Failed to update profile';
+      setError(backendError);
     }
 
     setLoading(false);
@@ -119,6 +172,91 @@ const AccountSettings = () => {
                 <p className="text-gray-900">{customer?.address || 'Not provided'}</p>
               </div>
             </div>
+          </div>
+          {/* Edit Account Information */}
+          <div className="bg-white rounded-xl shadow-md p-4 md:p-6 lg:p-8">
+            <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-4">
+              Edit Account Information
+            </h2>
+
+            <form onSubmit={handleProfileUpdate} className="space-y-4">
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                  {error}
+                </div>
+              )}
+
+              {message && (
+                <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
+                  {message}
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                  <input
+                    type="text"
+                    value={profileForm.first_name}
+                    onChange={(e) => setProfileForm({ ...profileForm, first_name: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                  <input
+                    type="text"
+                    value={profileForm.last_name}
+                    onChange={(e) => setProfileForm({ ...profileForm, last_name: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                  <input
+                    type="text"
+                    value={profileForm.phone}
+                    onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    placeholder="(555) 555-5555"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                  <input
+                    type="text"
+                    value={profileForm.city}
+                    onChange={(e) => setProfileForm({ ...profileForm, city: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    placeholder="City"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">State</label>
+                  <input
+                    type="text"
+                    value={profileForm.state}
+                    onChange={(e) => setProfileForm({ ...profileForm, state: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    placeholder="State"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded font-medium disabled:opacity-50"
+              >
+                {loading ? 'Saving...' : 'Save Changes'}
+              </button>
+            </form>
           </div>
 
           {/* Email Verification */}
