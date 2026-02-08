@@ -136,7 +136,9 @@ const Tickets = () => {
       {filteredTickets.length === 0 ? (
         <div className="no-tickets">
           <p>No tickets found with status: {filter}</p>
-          <Link to="/create-ticket" className="btn-create">Create your first ticket</Link>
+          {filter === 'Open' && (
+            <Link to="/create-ticket" className="btn-create">Create an open ticket</Link>
+          )}
         </div>
       ) : (
         <div className="tickets-grid">
