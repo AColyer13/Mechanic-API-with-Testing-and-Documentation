@@ -13,6 +13,7 @@ const Tickets = () => {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+  const [updatingId, setUpdatingId] = useState(null);
 
   useEffect(() => {
     fetchTickets();
@@ -26,6 +27,33 @@ const Tickets = () => {
       console.error('Error fetching tickets:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const updateTicketStatus = async (ticketId, newStatus) => {
+    setUpdatingId(ticketId);
+    try {
+      await serviceTicketAPI.update(ticketId, { status: newStatus });
+      // Refresh tickets after update
+      const response = await serviceTicketAPI.getByCustomer(customer.id);
+      setTickets(response.data);
+    } catch (error) {
+      console.error('Error updating ticket status:', error);
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
+  const getNextStatus = (currentStatus) => {
+    switch (currentStatus) {
+      case 'Open':
+        return 'In Progress';
+      case 'In Progress':
+        return 'Completed';
+      case 'Completed':
+        return 'Open';
+      default:
+        return 'Open';
     }
   };
 
@@ -155,10 +183,25 @@ const Tickets = () => {
               </div>
               
               <div className="ticket-footer">
-                <span>Created: {new Date(ticket.created_at).toLocaleDateString()}</span>
-                {ticket.completed_at && (
-                  <span>Completed: {new Date(ticket.completed_at).toLocaleDateString()}</span>
-                )}
+                <div className="ticket-dates">
+                  <span>Created: {new Date(ticket.created_at).toLocaleDateString()}</span>
+                  {ticket.completed_at && (
+                    <span>Completed: {new Date(ticket.completed_at).toLocaleDateString()}</span>
+                  )}
+                </div>
+                
+                <div className="ticket-status-controls">
+                  <select 
+                    value={ticket.status}
+                    onChange={(e) => updateTicketStatus(ticket.id, e.target.value)}
+                    disabled={updatingId === ticket.id}
+                    className="status-dropdown"
+                  >
+                    <option value="Open">Open</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Completed">Completed</option>
+                  </select>
+                </div>
               </div>
             </div>
           ))}
