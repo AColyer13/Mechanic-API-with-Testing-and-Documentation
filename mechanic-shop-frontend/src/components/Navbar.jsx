@@ -39,12 +39,12 @@ const Navbar = () => {
   return (
     <nav className="bg-gradient-to-r from-purple-600 to-purple-800 shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex items-center h-16">
           
           {/* Left Side: Logo */}
           <Link 
             to="/" 
-            className="text-white text-xl md:text-2xl font-bold hover:text-purple-200 transition-colors flex items-center gap-2"
+            className="text-white text-xl md:text-2xl font-bold hover:text-purple-200 transition-colors flex items-center gap-2 flex-shrink-0"
             onClick={closeMobileMenu}
           >
             <span className="text-2xl">🚗</span>
@@ -53,7 +53,7 @@ const Navbar = () => {
           </Link>
           
           {/* CENTER: Desktop Navigation Links */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-8 flex-1 justify-center">
             {isAuthenticated ? (
               <>
                 <Link to="/dashboard" className="text-white hover:text-purple-200 transition-colors font-medium">
@@ -69,8 +69,8 @@ const Navbar = () => {
             ) : null}
           </div>
 
-          {/* Right Side: Auth / User Avatar with Dropdown */}
-          <div className="hidden md:flex items-center gap-4">
+          {/* Right Side: Auth / User Avatar with Dropdown - Aligned Right */}
+          <div className="hidden md:flex items-center ml-auto">
             {isAuthenticated ? (
               <div className="relative" ref={dropdownRef}>
                 {/* Avatar Button */}
