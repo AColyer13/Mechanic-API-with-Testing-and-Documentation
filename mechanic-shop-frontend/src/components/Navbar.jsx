@@ -52,9 +52,13 @@ const Navbar = () => {
                 <Link to="/account-settings" className="text-white hover:text-purple-200 transition-colors font-medium">
                   Account Settings
                 </Link>
-                <span className="text-purple-200 text-sm">
-                  Welcome, {customer?.first_name}
-                </span>
+                <Link
+                  to="/account-settings"
+                  className="flex items-center justify-center w-10 h-10 rounded-full bg-white text-purple-600 font-bold text-lg hover:bg-purple-100 transition-colors"
+                  title={`${customer?.first_name} ${customer?.last_name}`}
+                >
+                  {customer?.first_name?.charAt(0).toUpperCase() || 'U'}
+                </Link>
                 <button 
                   onClick={handleLogout} 
                   className="bg-white text-purple-600 px-4 py-2 rounded-lg font-semibold hover:bg-purple-100 transition-colors"
@@ -102,9 +106,15 @@ const Navbar = () => {
           <div className="px-4 py-3 space-y-3">
             {isAuthenticated ? (
               <>
-                <div className="text-purple-200 text-sm pb-2 border-b border-purple-600">
-                  Welcome, {customer?.first_name}
-                </div>
+                <Link
+                  to="/account-settings"
+                  className="flex items-center justify-center w-12 h-12 rounded-full bg-white text-purple-600 font-bold text-xl hover:bg-purple-100 transition-colors mb-2"
+                  title={`${customer?.first_name} ${customer?.last_name}`}
+                  onClick={closeMobileMenu}
+                >
+                  {customer?.first_name?.charAt(0).toUpperCase() || 'U'}
+                </Link>
+                <p className="text-white text-sm font-medium">{customer?.first_name} {customer?.last_name}</p>
                 <Link 
                   to="/dashboard" 
                   className="block text-white hover:text-purple-200 transition-colors font-medium py-2"
