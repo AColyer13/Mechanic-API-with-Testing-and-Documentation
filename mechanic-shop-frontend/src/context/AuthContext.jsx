@@ -76,7 +76,23 @@ export const AuthProvider = ({ children }) => {
       const result = await signInWithPopup(auth, provider);
       const firebaseUser = result.user;
       
-      // Check if customer profile exists in Firestore
+      // Check if this email is already registered with email/password
+      try {
+        const emailCheckResponse = await customerAPI.checkEmailExists(firebaseUser.email);
+        if (emailCheckResponse.data.exists) {
+          // Email is already registered with email/password, sign them out and show error
+          await signOut(auth);
+          return {
+            success: false,
+            error: `An account with email "${firebaseUser.email}" already exists. Please use your email and password to login instead.`
+          };
+        }
+      } catch (emailCheckError) {
+        console.warn('Error checking email existence:', emailCheckError);
+        // Continue anyway - this is not a critical check
+      }
+      
+      // Check if customer profile exists in Firestore (for this Google account)
       try {
         await customerAPI.getById(firebaseUser.uid);
         // Profile exists, login successful

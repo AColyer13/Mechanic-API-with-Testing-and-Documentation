@@ -223,4 +223,38 @@ router.delete('/:id', verifyToken, async (req, res) => {
   }
 });
 
+/**
+ * GET /customers/check-email/:email - Check if email already exists
+ * Used for Google Sign-In conflict detection
+ * Does NOT require authentication
+ */
+router.get('/check-email/:email', async (req, res) => {
+  try {
+    const email = req.params.email;
+    
+    if (!email) {
+      return res.status(400).json({ error: 'Email parameter is required' });
+    }
+    
+    // Try to find customer by email
+    try {
+      const customer = await getCustomerByEmail(email);
+      // Email exists
+      return res.status(200).json({
+        exists: true,
+        message: 'Email already registered with email/password'
+      });
+    } catch (error) {
+      // Email doesn't exist
+      return res.status(200).json({
+        exists: false,
+        message: 'Email not registered'
+      });
+    }
+  } catch (error) {
+    console.error('Error checking email:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;

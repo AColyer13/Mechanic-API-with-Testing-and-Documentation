@@ -55,6 +55,7 @@ export const customerAPI = {
   update: (id, data) => api.put(`/customers/${id}`, data),
   delete: (id) => api.delete(`/customers/${id}`),
   getMyTickets: () => api.get('/customers/my-tickets'),
+  checkEmailExists: (email) => api.get(`/customers/check-email/${email}`),
 };
 
 // Mechanic API calls
