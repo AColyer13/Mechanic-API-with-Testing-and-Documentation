@@ -107,8 +107,29 @@ const Tickets = () => {
               </div>
               
               <div className="ticket-body">
-                <h3>Description</h3>
-                <p>{ticket.description}</p>
+                <div className="ticket-section">
+                  <h4>Vehicle Information</h4>
+                  <ul>
+                    {(ticket.vehicle_year || ticket.vehicle_make || ticket.vehicle_model) && (
+                      <li>{ticket.vehicle_year && `${ticket.vehicle_year} `}{ticket.vehicle_make} {ticket.vehicle_model}</li>
+                    )}
+                    {ticket.vehicle_vin && (
+                      <li>VIN: {ticket.vehicle_vin}</li>
+                    )}
+                  </ul>
+                </div>
+
+                <div className="ticket-section">
+                  <h3>Description</h3>
+                  <p>{ticket.description}</p>
+                </div>
+
+                {ticket.estimated_cost && (
+                  <div className="ticket-section">
+                    <h4>Cost</h4>
+                    <p className="ticket-cost">${ticket.estimated_cost.toFixed(2)}</p>
+                  </div>
+                )}
                 
                 {ticket.assigned_mechanics?.length > 0 && (
                   <div className="ticket-section">

@@ -166,3 +166,17 @@
   margin-bottom: 1.5rem;
   font-size: 1.1rem;
 }
+
+.ticket-cost {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #667eea;
+  margin: 0;
+}
+
+.loading {
+  padding: 4rem 2rem;
+  text-align: center;
+  color: #95a5a6;
+  font-size: 1.1rem;
+}
