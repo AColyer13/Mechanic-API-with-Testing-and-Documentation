@@ -3,33 +3,61 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 2rem;
+  padding: 1rem;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  width: 100%;
+  overflow-x: hidden;
 }
 
 .auth-card {
   background: white;
-  padding: 2.5rem;
+  padding: 1.5rem;
   border-radius: 10px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
   width: 100%;
   max-width: 500px;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+@media (min-width: 640px) {
+  .auth-card {
+    padding: 2.5rem;
+  }
+
+  .auth-container {
+    padding: 2rem;
+  }
 }
 
 .auth-card h2 {
   margin-bottom: 1.5rem;
   color: #2c3e50;
   text-align: center;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
 }
 
 .form-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 1rem;
+  width: 100%;
+}
+
+/* Stack horizontally on tablets and up */
+@media (min-width: 640px) {
+  .form-row {
+    grid-template-columns: 1fr 1fr;
+  }
 }
 
 .form-group {
   margin-bottom: 1.5rem;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .form-group label {
@@ -37,6 +65,8 @@
   margin-bottom: 0.5rem;
   color: #34495e;
   font-weight: 500;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .form-group input,
@@ -45,18 +75,37 @@
   padding: 0.75rem;
   border: 1px solid #ddd;
   border-radius: 4px;
-  font-size: 1rem;
-  transition: border-color 0.3s;
+  font-size: 16px; /* Prevents zoom on iOS */
+  transition: border-color 0.3s, box-shadow 0.3s;
+  box-sizing: border-box;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+  color: #999;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
   border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 100px;
+  max-width: 100%;
 }
 
 .btn-primary {
   width: 100%;
+  max-width: 100%;
   padding: 0.75rem;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
@@ -65,17 +114,64 @@
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.2s;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-sizing: border-box;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
-.btn-primary:hover {
+.btn-primary:hover:not(:disabled) {
   transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 .btn-primary:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
+}
+
+.btn-google {
+  width: 100%;
+  max-width: 100%;
+  padding: 10px 16px !important;
+  margin-top: 16px;
+  background-color: #ffffff !important;
+  color: #333 !important;
+  border: 1px solid #ddd !important;
+  border-radius: 4px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  transition: all 0.3s ease !important;
+  box-sizing: border-box;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.btn-google:hover:not(:disabled) {
+  background-color: #f5f5f5 !important;
+  border-color: #999 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+}
+
+.btn-google:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-google svg {
+  max-width: 18px;
+  height: auto;
+  flex-shrink: 0;
 }
 
 .error-message {
@@ -85,25 +181,112 @@
   border-radius: 4px;
   margin-bottom: 1rem;
   border-left: 3px solid #c0392b;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
+}
+
+.success-message {
+  background-color: #e4ffe4;
+  color: #27ae60;
+  padding: 0.75rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  border-left: 3px solid #27ae60;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
+  text-align: center;
 }
 
 .auth-link {
   text-align: center;
   margin-top: 1.5rem;
   color: #7f8c8d;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .auth-link a {
   color: #667eea;
   text-decoration: none;
   font-weight: 500;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .auth-link a:hover {
   text-decoration: underline;
 }
+
 .form-divider {
   position: relative;
   border-top: 1px solid #e0e0e0;
   margin: 20px 0;
+  width: 100%;
+}
+
+/* ============================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================ */
+
+@media (max-width: 480px) {
+  .auth-container {
+    padding: 0.5rem;
+    min-height: calc(100vh - 64px);
+  }
+
+  .auth-card {
+    padding: 1rem;
+    border-radius: 8px;
+  }
+
+  .auth-card h2 {
+    font-size: 1.5rem;
+  }
+
+  .form-group {
+    margin-bottom: 1rem;
+  }
+
+  .form-group input,
+  .form-group textarea {
+    padding: 0.75rem;
+    font-size: 16px;
+    border-radius: 4px;
+  }
+
+  .btn-primary,
+  .btn-google {
+    padding: 0.75rem !important;
+    font-size: 0.875rem !important;
+  }
+}
+
+@media (min-width: 481px) and (max-width: 768px) {
+  .auth-card {
+    max-width: 450px;
+  }
+}
+
+@media (min-width: 769px) {
+  .auth-card {
+    max-width: 500px;
+  }
+}
+
+/* Landscape Mode on Mobile */
+@media (max-height: 600px) and (orientation: landscape) {
+  .auth-container {
+    min-height: auto;
+    padding: 1rem;
+  }
+
+  .auth-card {
+    padding: 1.5rem;
+  }
+
+  .form-group {
+    margin-bottom: 0.75rem;
+  }
 }
