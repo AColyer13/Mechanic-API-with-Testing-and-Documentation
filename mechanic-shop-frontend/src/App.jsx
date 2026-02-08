@@ -52,6 +52,14 @@ function App() {
                 }
               />
               <Route
+                path="/create-ticket"
+                element={
+                  <ProtectedRoute>
+                    <CreateTicket />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/account-settings"
                 element={
                   <ProtectedRoute>
