@@ -2,7 +2,9 @@
  * Global Styles - Minimal (Tailwind handles most styling)
  */
 
-/* Custom scrollbar for desktop */
+/* Custom scrollbar for Chromium/WebKit browsers (progressive enhancement)
+   Note: No standard exists for scrollbar styling; Firefox ignores these rules
+   and uses system scrollbar. This provides better UX for Chrome/Edge/Safari. */
 ::-webkit-scrollbar {
   width: 10px;
 }
