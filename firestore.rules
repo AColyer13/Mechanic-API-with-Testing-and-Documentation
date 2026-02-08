@@ -1,0 +1,28 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Customers collection
+    match /customers/{customerId} {
+      allow read: if request.auth != null;
+      allow create: if true; // Allow registration
+      allow update, delete: if request.auth != null && request.auth.uid == customerId;
+    }
+    
+    // Mechanics collection
+    match /mechanics/{mechanicId} {
+      allow read: if request.auth != null;
+      allow create, update, delete: if request.auth != null;
+    }
+    
+    // Inventory collection
+    match /inventory/{inventoryId} {
+      allow read, write: if request.auth != null;
+    }
+    
+    // Service Tickets collection
+    match /serviceTickets/{ticketId} {
+      allow read, write: if request.auth != null;
+    }
+  }
+}
