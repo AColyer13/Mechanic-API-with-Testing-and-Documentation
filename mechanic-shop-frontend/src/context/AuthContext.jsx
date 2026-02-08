@@ -24,7 +24,7 @@ const AuthContext = createContext(null);
 export const AuthProvider = ({ children }) => {
   const [customer, setCustomer] = useState(null);
   const [user, setUser] = useState(null); // Firebase user
-  const [accountMergePrompt, setAccountMergePrompt] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     // Listen to Firebase auth state changes
@@ -87,14 +87,12 @@ export const AuthProvider = ({ children }) => {
       try {
         const emailCheckResponse = await customerAPI.checkEmailExists(firebaseUser.email);
         if (emailCheckResponse.data.exists) {
-          // Email is already registered with email/password
-          // Show merge prompt instead of error
-          setAccountMergePrompt({
-            email: firebaseUser.email,
-            action: 'merge'
-          });
-          // Keep user logged in with Google for now
-          return { success: false, requiresAccountMerge: true };
+          // Email is already registered with email/password, sign them out and show error
+          await signOut(auth);
+          return {
+            success: false,
+            error: `An account with email "${firebaseUser.email}" already exists. Please use your email and password to login instead.`
+          };
         }
       } catch (emailCheckError) {
         console.warn('Error checking email existence:', emailCheckError);
@@ -245,20 +243,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const handleMergeAccountsYes = async () => {
-    // User chose to merge - sign out Google and let them login with email/password
-    await signOut(auth);
-    setAccountMergePrompt(null);
-    return { success: false, message: 'Please login with your email and password to merge accounts' };
-  };
-
-  const handleMergeAccountsNo = async () => {
-    // User chose not to merge - sign out Google
-    await signOut(auth);
-    setAccountMergePrompt(null);
-    return { success: false };
-  };
-
   const value = {
     customer,
     user,
@@ -271,9 +255,6 @@ export const AuthProvider = ({ children }) => {
     resetPassword,
     changeEmail,
     refreshUser,
-    handleMergeAccountsYes,
-    handleMergeAccountsNo,
-    accountMergePrompt,
     isAuthenticated: !!user,
     isEmailVerified: user?.emailVerified || false,
   };

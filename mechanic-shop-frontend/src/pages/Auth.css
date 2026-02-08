@@ -22,28 +22,27 @@
 
 @media (min-width: 640px) {
   .auth-card {
-    padding: 2rem;
+    padding: 2.5rem;
   }
 
   .auth-container {
-    padding: 1rem;
+    padding: 2rem;
   }
 }
 
 .auth-card h2 {
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
   color: #2c3e50;
   text-align: center;
   word-wrap: break-word;
   overflow-wrap: break-word;
   max-width: 100%;
-  font-size: 1.5rem;
 }
 
 .form-row {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 0.75rem;
+  gap: 1rem;
   width: 100%;
 }
 
@@ -55,7 +54,7 @@
 }
 
 .form-group {
-  margin-bottom: 0.9rem;
+  margin-bottom: 1.5rem;
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -63,12 +62,11 @@
 
 .form-group label {
   display: block;
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.5rem;
   color: #34495e;
   font-weight: 500;
   word-wrap: break-word;
   overflow-wrap: break-word;
-  font-size: 0.9rem;
 }
 
 .form-group input,
@@ -140,8 +138,8 @@
 .btn-google {
   width: 100%;
   max-width: 100%;
-  padding: 0.75rem !important;
-  margin-top: 0.75rem !important;
+  padding: 10px 16px !important;
+  margin-top: 16px;
   background-color: #ffffff !important;
   color: #333 !important;
   border: 1px solid #ddd !important;
@@ -203,7 +201,7 @@
 
 .auth-link {
   text-align: center;
-  margin-top: 1rem;
+  margin-top: 1.5rem;
   color: #7f8c8d;
   word-wrap: break-word;
   overflow-wrap: break-word;
@@ -224,7 +222,7 @@
 .form-divider {
   position: relative;
   border-top: 1px solid #e0e0e0;
-  margin: 1rem 0;
+  margin: 20px 0;
   width: 100%;
 }
 
