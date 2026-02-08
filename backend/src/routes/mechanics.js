@@ -28,14 +28,22 @@ router.post('/', async (req, res) => {
     // Validation
     if (!first_name || !last_name || !email) {
       return res.status(400).json({
-        error: 'Missing required fields: first_name, last_name, email'
+        errors: ['Missing required fields: first_name, last_name, email']
+      });
+    }
+    
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        errors: ['Invalid email format']
       });
     }
     
     // Check if email already exists
     const existing = await getMechanicByEmail(email);
     if (existing) {
-      return res.status(409).json({ error: 'Email already registered' });
+      return res.status(409).json({ error: 'Email already exists' });
     }
     
     const mechanicData = {
@@ -107,7 +115,12 @@ router.put('/:id', async (req, res) => {
     if (email) updateData.email = email;
     if (phone !== undefined) updateData.phone = phone;
     if (specialty !== undefined) updateData.specialty = specialty;
-    if (hourly_rate !== undefined) updateData.hourly_rate = hourly_rate;
+    if (hourly_rate !== undefined) {
+      if (typeof hourly_rate !== 'number') {
+        return res.status(400).json({ error: 'hourly_rate must be a number' });
+      }
+      updateData.hourly_rate = hourly_rate;
+    }
     
     if (Object.keys(updateData).length === 0) {
       return res.status(400).json({ error: 'No fields to update' });
@@ -117,7 +130,7 @@ router.put('/:id', async (req, res) => {
     if (email && email !== existing.email) {
       const emailInUse = await getMechanicByEmail(email);
       if (emailInUse) {
-        return res.status(409).json({ error: 'Email already in use' });
+        return res.status(409).json({ error: 'Email already exists' });
       }
     }
     

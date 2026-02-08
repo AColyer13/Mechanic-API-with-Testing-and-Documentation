@@ -12,6 +12,16 @@ if (!admin.apps.length) {
 
 const db = admin.firestore();
 
+// Configure for emulator if FIRESTORE_EMULATOR_HOST is set
+if (process.env.FIRESTORE_EMULATOR_HOST) {
+  const [host, port] = process.env.FIRESTORE_EMULATOR_HOST.split(':');
+  db.settings({
+    host: `${host}:${port}`,
+    ssl: false
+  });
+  console.log(`🔧 Firestore configured for emulator: ${host}:${port}`);
+}
+
 // Collection names
 const COLLECTIONS = {
   CUSTOMERS: 'customers',
@@ -45,7 +55,7 @@ async function getDocumentById(collectionName, docId) {
 async function createDocument(collectionName, data) {
   const docRef = await db.collection(collectionName).add({
     ...data,
-    created_at: admin.firestore.FieldValue.serverTimestamp()
+    created_at: admin.firestore.FieldValue?.serverTimestamp() || new Date().toISOString()
   });
   const doc = await docRef.get();
   return { id: doc.id, ...doc.data() };
@@ -85,9 +95,25 @@ async function queryDocuments(collectionName, filters = []) {
  * Add item to array field
  */
 async function addToArrayField(collectionName, docId, fieldName, value) {
-  await db.collection(collectionName).doc(docId).update({
-    [fieldName]: admin.firestore.FieldValue.arrayUnion(value)
-  });
+  // Get the document first
+  const doc = await getDocumentById(collectionName, docId);
+  if (!doc) {
+    throw new Error('Document not found');
+  }
+  
+  // Get current array or initialize empty array
+  const currentArray = doc[fieldName] || [];
+  
+  // Check if value already exists (to mimic arrayUnion behavior)
+  if (!currentArray.includes(value)) {
+    currentArray.push(value);
+    
+    // Update document with new array
+    await db.collection(collectionName).doc(docId).update({
+      [fieldName]: currentArray
+    });
+  }
+  
   return getDocumentById(collectionName, docId);
 }
 
@@ -95,9 +121,23 @@ async function addToArrayField(collectionName, docId, fieldName, value) {
  * Remove item from array field
  */
 async function removeFromArrayField(collectionName, docId, fieldName, value) {
+  // Get the document first
+  const doc = await getDocumentById(collectionName, docId);
+  if (!doc) {
+    throw new Error('Document not found');
+  }
+  
+  // Get current array or initialize empty array
+  const currentArray = doc[fieldName] || [];
+  
+  // Filter out the value (to mimic arrayRemove behavior)
+  const newArray = currentArray.filter(item => item !== value);
+  
+  // Update document with new array
   await db.collection(collectionName).doc(docId).update({
-    [fieldName]: admin.firestore.FieldValue.arrayRemove(value)
+    [fieldName]: newArray
   });
+  
   return getDocumentById(collectionName, docId);
 }
 

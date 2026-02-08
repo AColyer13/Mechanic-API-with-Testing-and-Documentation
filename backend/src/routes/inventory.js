@@ -25,12 +25,12 @@ router.post('/', async (req, res) => {
     // Validation
     if (!name || price === undefined) {
       return res.status(400).json({
-        error: 'Missing required fields: name, price'
+        errors: ['Missing required fields: name, price']
       });
     }
     
     if (typeof price !== 'number' || price < 0) {
-      return res.status(400).json({ error: 'Price must be a non-negative number' });
+      return res.status(400).json({ errors: ['Price must be a non-negative number'] });
     }
     
     const partData = {

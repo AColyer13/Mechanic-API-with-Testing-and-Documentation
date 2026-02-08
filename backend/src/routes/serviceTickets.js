@@ -39,14 +39,14 @@ router.post('/', async (req, res) => {
     // Validation
     if (!customer_id || !description) {
       return res.status(400).json({
-        error: 'Missing required fields: customer_id, description'
+        errors: ['Missing required fields: customer_id, description']
       });
     }
     
     // Verify customer exists
     const customerExists = await documentExists(COLLECTIONS.CUSTOMERS, customer_id);
     if (!customerExists) {
-      return res.status(404).json({ error: 'Customer not found' });
+      return res.status(400).json({ error: 'Invalid customer_id' });
     }
     
     const ticketData = {
@@ -205,6 +205,7 @@ router.put('/:ticketId/assign-mechanic/:mechanicId', async (req, res) => {
     }
     
     const updated = await addToArrayField(COLLECTIONS.SERVICE_TICKETS, ticketId, 'mechanic_ids', mechanicId);
+    updated.message = 'Mechanic assigned successfully';
     return res.status(200).json(updated);
   } catch (error) {
     console.error('Error assigning mechanic:', error);
@@ -226,10 +227,11 @@ router.put('/:ticketId/remove-mechanic/:mechanicId', async (req, res) => {
     
     // Check if mechanic is assigned
     if (!ticket.mechanic_ids || !ticket.mechanic_ids.includes(mechanicId)) {
-      return res.status(404).json({ error: 'Mechanic not assigned to this ticket' });
+      return res.status(400).json({ error: 'Mechanic not assigned to this ticket' });
     }
     
     const updated = await removeFromArrayField(COLLECTIONS.SERVICE_TICKETS, ticketId, 'mechanic_ids', mechanicId);
+    updated.message = 'Mechanic removed successfully';
     return res.status(200).json(updated);
   } catch (error) {
     console.error('Error removing mechanic:', error);
@@ -262,6 +264,7 @@ router.put('/:ticketId/add-part/:partId', async (req, res) => {
     }
     
     const updated = await addToArrayField(COLLECTIONS.SERVICE_TICKETS, ticketId, 'inventory_ids', partId);
+    updated.message = 'Part added successfully';
     return res.status(200).json(updated);
   } catch (error) {
     console.error('Error adding part:', error);
@@ -283,10 +286,11 @@ router.put('/:ticketId/remove-part/:partId', async (req, res) => {
     
     // Check if part is added
     if (!ticket.inventory_ids || !ticket.inventory_ids.includes(partId)) {
-      return res.status(404).json({ error: 'Part not added to this ticket' });
+      return res.status(400).json({ error: 'Part not added to this ticket' });
     }
     
     const updated = await removeFromArrayField(COLLECTIONS.SERVICE_TICKETS, ticketId, 'inventory_ids', partId);
+    updated.message = 'Part removed successfully';
     return res.status(200).json(updated);
   } catch (error) {
     console.error('Error removing part:', error);

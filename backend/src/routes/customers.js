@@ -29,14 +29,14 @@ router.post('/', async (req, res) => {
     // Validation
     if (!first_name || !last_name || !email || !password) {
       return res.status(400).json({
-        error: 'Missing required fields: first_name, last_name, email, password'
+        errors: ['Missing required fields: first_name, last_name, email, password']
       });
     }
     
     // Check if email already exists
     const existingCustomer = await getCustomerByEmail(email);
     if (existingCustomer) {
-      return res.status(409).json({ error: 'Email already registered' });
+      return res.status(409).json({ error: 'Email already exists' });
     }
     
     // Hash password
@@ -105,6 +105,24 @@ router.post('/login', async (req, res) => {
 });
 
 /**
+ * GET /customers/my-tickets - Get authenticated customer's tickets
+ * Requires authentication
+ */
+router.get('/my-tickets', verifyToken, async (req, res) => {
+  try {
+    const customerId = req.user.customer_id;
+    
+    // Get all tickets for this customer
+    const tickets = await getTicketsByCustomer(customerId);
+    
+    return res.status(200).json(tickets);
+  } catch (error) {
+    console.error('Error fetching customer tickets:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
  * GET /customers - Get all customers
  */
 router.get('/', async (req, res) => {
@@ -138,22 +156,6 @@ router.get('/:id', async (req, res) => {
     return res.status(200).json(customer);
   } catch (error) {
     console.error('Error fetching customer:', error);
-    return res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
-/**
- * GET /customers/my-tickets - Get tickets for logged-in customer
- * Requires authentication
- */
-router.get('/my-tickets', verifyToken, async (req, res) => {
-  try {
-    const customerId = req.user.customer_id;
-    const tickets = await getTicketsByCustomer(customerId);
-    
-    return res.status(200).json(tickets);
-  } catch (error) {
-    console.error('Error fetching customer tickets:', error);
     return res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -196,7 +198,7 @@ router.put('/:id', verifyToken, async (req, res) => {
     if (email && email !== existingCustomer.email) {
       const emailInUse = await getCustomerByEmail(email);
       if (emailInUse) {
-        return res.status(409).json({ error: 'Email already in use' });
+        return res.status(409).json({ error: 'Email already exists' });
       }
     }
     

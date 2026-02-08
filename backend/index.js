@@ -16,8 +16,43 @@ const serviceTicketsRouter = require('./src/routes/serviceTickets');
 // Create Express app
 const app = express();
 
+// CORS Configuration
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile apps, Postman, etc.)
+    if (!origin) return callback(null, true);
+    
+    // Allowed origins
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://localhost:4000',
+      'http://localhost:5173',
+      'http://127.0.0.1:3000',
+      'http://127.0.0.1:5173',
+      'https://acolyer13.github.io',
+      'https://mechanic-api-copy-with-testing-and.onrender.com'
+    ];
+    
+    // In development, allow all origins
+    if (process.env.NODE_ENV === 'development' || origin.includes('localhost')) {
+      return callback(null, true);
+    }
+    
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      // Still allow but log for monitoring
+      console.log('CORS request from:', origin);
+      callback(null, true);
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+
 // Middleware
-app.use(cors({ origin: true })); // Allow all origins (configure for production)
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Root route

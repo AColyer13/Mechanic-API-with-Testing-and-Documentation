@@ -3,15 +3,20 @@
 
 [![Build Status](https://github.com/AColyer13/Mechanic-API---Copy-with-Testing-and-Documentation/actions/workflows/ci.yaml/badge.svg)](https://github.com/AColyer13/Mechanic-API---Copy-with-Testing-and-Documentation/actions)
 [![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
+[![Firebase](https://img.shields.io/badge/Firebase-Deployed-orange.svg)](https://firebase.google.com/)
 
-A full‑featured **RESTful API** for managing a mechanic shop, built with **Flask** using the Application Factory pattern.
+A full‑featured **RESTful API** for managing a mechanic shop, available in two versions:
+1. **Flask (Python)** - Original version with MySQL
+2. **Firebase Cloud Functions (Node.js)** - New serverless version with Firestore
 
-Supports complete CRUD for **Customers**, **Mechanics**, **Service Tickets**, and **Inventory Parts**, with JWT authentication, rate limiting, caching, and 90+ automated tests.
+Supports complete CRUD for **Customers**, **Mechanics**, **Service Tickets**, and **Inventory Parts**, with JWT authentication, and comprehensive automated tests.
 
 ### Live Links
-- **Backend API**: https://mechanic-api-copy-with-testing-and.onrender.com
+- **Flask API (Render)**: https://mechanic-api-copy-with-testing-and.onrender.com
+- **Firebase API**: https://us-central1-mechanicshopapi.cloudfunctions.net/api
 - **Frontend Web App**: https://acolyer13.github.io/Mechanic-Website/
 - **Interactive Docs (Swagger UI)**: https://mechanic-api-copy-with-testing-and.onrender.com/api/docs
+- **Firebase Emulator UI**: http://localhost:4000 (when running locally)
 
 ---
 
@@ -191,19 +196,20 @@ More examples are in the Postman collection.
 
 | Layer         | Technology                                 |
 |---------------|---------------------------------------------|
-| Framework     | Flask 3.0 + Application Factory             |
-| Database      | MySQL + SQLAlchemy + Flask‑Migrate          |
-| Auth          | JWT (python‑jose) + bcrypt                  |
-| Validation    | Marshmallow                                 |
+| Framework     | Flask 3.0 (Python) / Express (Node.js)      |
+| Database      | MySQL + SQLAlchemy / Firestore              |
+| Auth          | JWT (python‑jose / jsonwebtoken) + bcrypt   |
+| Validation    | Marshmallow / Express validators            |
 | Rate Limiting | Flask‑Limiter                               |
 | Caching       | Flask‑Caching (5‑min TTL)                   |
-| Testing       | unittest (90+ tests)                        |
+| Testing       | unittest (90+ tests) / Mocha+Chai (55+ tests) |
 | Documentation | Flask‑Rebar → Swagger UI                    |
-| Deployment    | Render (auto‑deploy from main)              |
-| CI/CD         | GitHub Actions (build → test → deploy)      |
+| Deployment    | Render (Flask) / Firebase (Cloud Functions) |
+| CI/CD         | GitHub Actions / Firebase Emulators         |
 
 ## Testing & CI/CD
 
+### Flask (Python) Tests
 - 90+ unit tests (in‑memory SQLite, no production impact)
 - Covers authentication, validation, relationships, errors
 - GitHub Actions pipeline runs on every push/PR:
@@ -216,6 +222,84 @@ More examples are in the Postman collection.
 ```bash
 python -m unittest discover tests
 ```
+
+### Firebase Emulator Tests
+- 55+ integration tests using Firebase Emulators
+- Tests actual Cloud Functions with Firestore
+- Complete endpoint coverage with real HTTP requests
+- Automatic data cleanup between tests
+
+**Run locally:**
+
+```bash
+# Terminal 1: Start emulators
+cd backend
+npm run serve
+
+# Terminal 2: Run tests
+cd backend
+npm test
+```
+
+**📖 See [FIREBASE_TESTING_MIGRATION.md](FIREBASE_TESTING_MIGRATION.md) for complete Firebase testing documentation**
+
+---
+
+## Firebase Deployment
+
+The API is also deployed as Firebase Cloud Functions with Firestore database.
+
+### Quick Firebase Setup
+
+```bash
+# Install Firebase CLI
+npm install -g firebase-tools
+
+# Login to Firebase
+firebase login
+
+# Deploy
+firebase deploy --only "functions,firestore"
+```
+
+**Firebase Project:** `mechanicshopapi`  
+**Live URL:** https://us-central1-mechanicshopapi.cloudfunctions.net/api
+
+### Firebase Structure
+
+```
+backend/
+├── index.js                    # Cloud Functions entry point
+├── src/
+│   ├── routes/
+│   │   ├── customers.js
+│   │   ├── mechanics.js
+│   │   ├── inventory.js
+│   │   └── serviceTickets.js
+│   ├── middleware/
+│   │   └── auth.js            # JWT authentication
+│   └── models/
+│       └── firestoreHelper.js  # Firestore utilities
+├── test/                       # Firebase emulator tests
+│   ├── setup.js
+│   ├── customers.test.js
+│   ├── mechanics.test.js
+│   ├── inventory.test.js
+│   └── serviceTickets.test.js
+└── package.json
+
+firebase.json                   # Firebase configuration
+firestore.rules                 # Firestore security rules
+firestore.indexes.json          # Firestore indexes
+```
+
+### Postman Collection
+
+The Postman collection has been updated to work with both APIs:
+- **Flask API**: Use `http://127.0.0.1:5000` for local or Render URL for production
+- **Firebase API**: Use `https://us-central1-mechanicshopapi.cloudfunctions.net/api`
+
+Import `Mechanic API.postman_collection.json` (configured for Firebase by default)
 
 ## Project Structure
 
