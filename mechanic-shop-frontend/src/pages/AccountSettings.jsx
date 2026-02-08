@@ -101,6 +101,9 @@ const AccountSettings = () => {
       return;
     }
 
+    // Check if phone number is being changed
+    const phoneChanged = profileForm.phone !== (customer.phone || '');
+
     const updatePayload = {
       first_name: profileForm.first_name,
       last_name: profileForm.last_name,
@@ -108,6 +111,28 @@ const AccountSettings = () => {
       city: profileForm.city,
       state: profileForm.state
     };
+
+    // If phone is being changed, require verification
+    if (phoneChanged && profileForm.phone) {
+      setMfaError('');
+      setMfaMessage('');
+      setMfaLoading(true);
+      try {
+        const res = await startPhoneEnrollment(profileForm.phone);
+        if (res.success) {
+          setVerificationId(res.verificationId);
+          setMfaSent(true);
+          setMfaMessage('Verification code sent to new phone number. Please verify to complete the change.');
+        } else {
+          setMfaError(res.error || 'Failed to send verification code');
+        }
+      } catch (err) {
+        setMfaError(err.message || 'Failed to send verification code');
+      }
+      setMfaLoading(false);
+      setLoading(false);
+      return;
+    }
 
     try {
       const response = await customerAPI.update(customer.id, updatePayload);
@@ -193,125 +218,15 @@ const AccountSettings = () => {
 
           {/* Multi-factor Authentication (Optional) */}
           <div className="bg-white rounded-xl shadow-md p-4 md:p-6 lg:p-8">
-            <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-4">Two-Step Verification (Optional)</h2>
+            <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-4">Two-Step Verification</h2>
 
-            <p className="text-sm text-gray-700 mb-3">Enable SMS-based two-step verification for added account security. This is optional.</p>
+            <p className="text-sm text-gray-700 mb-3">Two-step verification is required for account security and was set up during registration.</p>
 
-            {mfaError && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-3">{mfaError}</div>}
-            {mfaMessage && <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded mb-3">{mfaMessage}</div>}
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Phone for 2-step verification</label>
-                <input
-                  type="text"
-                  value={profileForm.phone}
-                  onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  placeholder="+1 555 555 5555"
-                />
-              </div>
-
-              <div className="flex items-end">
-                <button
-                  onClick={async () => {
-                    setMfaError('');
-                    setMfaMessage('');
-                    setMfaLoading(true);
-                    try {
-                      const res = await startPhoneEnrollment(profileForm.phone);
-                      if (res.success) {
-                        setVerificationId(res.verificationId);
-                        setMfaSent(true);
-                        setMfaMessage('Verification code sent');
-                      } else {
-                        setMfaError(res.error || 'Failed to send verification code');
-                      }
-                    } catch (err) {
-                      setMfaError(err.message || 'Failed to send verification code');
-                    }
-                    setMfaLoading(false);
-                  }}
-                  disabled={mfaLoading}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium disabled:opacity-50"
-                >
-                  {mfaLoading ? 'Sending...' : 'Send verification code'}
-                </button>
-              </div>
+            <div className="bg-green-50 border border-green-200 rounded p-3">
+              <p className="text-sm text-green-700">
+                <strong>Status:</strong> Enabled (Phone verification required)
+              </p>
             </div>
-
-            {mfaSent && (
-              <form
-                onSubmit={async (e) => {
-                  e.preventDefault();
-                  setMfaError('');
-                  setMfaMessage('');
-                  setMfaLoading(true);
-
-                  try {
-                    const res = await finalizePhoneEnrollment(verificationId, verificationCode, `${profileForm.first_name} ${profileForm.last_name}`);
-                    if (res.success) {
-                      // Ensure backend marks phone_verified and stores phone
-                      try {
-                        await customerAPI.update(customer.id, { phone: profileForm.phone, phone_verified: true });
-                        await refreshCustomer();
-                      } catch (err) {
-                        console.warn('Backend update failed after MFA enroll', err);
-                      }
-
-                      setMfaMessage('Phone verified and two-step verification enabled');
-                      setMfaSent(false);
-                      setVerificationCode('');
-                    } else {
-                      setMfaError(res.error || 'Verification failed');
-                    }
-                  } catch (err) {
-                    setMfaError(err.message || 'Verification failed');
-                  }
-
-                  setMfaLoading(false);
-                }}
-                className="space-y-4"
-              >
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Enter verification code</label>
-                  <input
-                    type="text"
-                    value={verificationCode}
-                    onChange={(e) => setVerificationCode(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                    placeholder="123456"
-                    required
-                  />
-                </div>
-
-                <div className="flex gap-2">
-                  <button
-                    type="submit"
-                    disabled={mfaLoading}
-                    className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded font-medium disabled:opacity-50"
-                  >
-                    {mfaLoading ? 'Verifying...' : 'Verify and enable 2-step'}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setMfaSent(false);
-                      setVerificationId(null);
-                      setVerificationCode('');
-                      setMfaMessage('');
-                      setMfaError('');
-                    }}
-                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            )}
-
-            <div id="recaptcha-container" />
           </div>
           {/* Edit Account Information */}
           <div className="bg-white rounded-xl shadow-md p-4 md:p-6 lg:p-8">
@@ -398,6 +313,96 @@ const AccountSettings = () => {
               </button>
             </form>
           </div>
+
+          {/* Phone Verification for Profile Update */}
+          {mfaSent && (
+            <div className="bg-white rounded-xl shadow-md p-4 md:p-6 lg:p-8">
+              <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-4">
+                Verify New Phone Number
+              </h2>
+
+              {mfaError && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-3">{mfaError}</div>}
+              {mfaMessage && <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded mb-3">{mfaMessage}</div>}
+
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  setMfaError('');
+                  setMfaMessage('');
+                  setMfaLoading(true);
+
+                  try {
+                    const res = await finalizePhoneEnrollment(verificationId, verificationCode, `${profileForm.first_name} ${profileForm.last_name}`);
+                    if (res.success) {
+                      // Now save the profile update
+                      const updatePayload = {
+                        first_name: profileForm.first_name,
+                        last_name: profileForm.last_name,
+                        phone: profileForm.phone,
+                        phone_verified: true,
+                        city: profileForm.city,
+                        state: profileForm.state
+                      };
+
+                      try {
+                        await customerAPI.update(customer.id, updatePayload);
+                        setMessage('Profile updated successfully with verified phone number');
+                        await refreshCustomer();
+                        setMfaSent(false);
+                        setVerificationCode('');
+                        setVerificationId(null);
+                      } catch (err) {
+                        setMfaError('Phone verified but failed to update profile');
+                      }
+                    } else {
+                      setMfaError(res.error || 'Verification failed');
+                    }
+                  } catch (err) {
+                    setMfaError(err.message || 'Verification failed');
+                  }
+
+                  setMfaLoading(false);
+                }}
+                className="space-y-4"
+              >
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Enter verification code sent to {profileForm.phone}</label>
+                  <input
+                    type="text"
+                    value={verificationCode}
+                    onChange={(e) => setVerificationCode(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    placeholder="123456"
+                    required
+                  />
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    type="submit"
+                    disabled={mfaLoading}
+                    className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded font-medium disabled:opacity-50"
+                  >
+                    {mfaLoading ? 'Verifying...' : 'Verify & Save Changes'}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMfaSent(false);
+                      setVerificationId(null);
+                      setVerificationCode('');
+                      setMfaMessage('');
+                      setMfaError('');
+                    }}
+                    className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
 
           {/* Email Verification */}
           {!user?.emailVerified && (
@@ -486,6 +491,7 @@ const AccountSettings = () => {
           </div>
         </div>
       </div>
+      <div id="recaptcha-container" />
     </div>
   );
 };

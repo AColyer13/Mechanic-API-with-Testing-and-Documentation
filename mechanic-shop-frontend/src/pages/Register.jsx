@@ -24,8 +24,14 @@ const Register = () => {
   const [requiresGoogleLink, setRequiresGoogleLink] = useState(false);
   const [mergeRequired, setMergeRequired] = useState(false);
   const [googleSignupData, setGoogleSignupData] = useState(null);
+  const [mfaSent, setMfaSent] = useState(false);
+  const [verificationId, setVerificationId] = useState(null);
+  const [verificationCode, setVerificationCode] = useState('');
+  const [mfaLoading, setMfaLoading] = useState(false);
+  const [mfaMessage, setMfaMessage] = useState('');
+  const [mfaError, setMfaError] = useState('');
   
-  const { register, loginWithGoogle, linkPasswordToGoogle, mergeGoogleWithPassword } = useAuth();
+  const { register, loginWithGoogle, linkPasswordToGoogle, mergeGoogleWithPassword, startPhoneEnrollment, finalizePhoneEnrollment } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -50,6 +56,13 @@ const Register = () => {
       return;
     }
 
+    // Validate phone is required for 2FA
+    if (!formData.phone) {
+      setError('Phone number is required for account verification');
+      setLoading(false);
+      return;
+    }
+
     // Remove confirmPassword before sending to API
     const registerData = { ...formData };
     delete registerData.confirmPassword;
@@ -58,11 +71,28 @@ const Register = () => {
     
     if (result.success) {
       if (result.requiresEmailVerification) {
-        setSuccessMessage('Registration successful! Please verify your email to continue.');
+        // After email verification, user will need to complete phone verification
+        setSuccessMessage('Registration successful! Please verify your email first, then complete phone verification.');
         // Auto-redirect to verify email after showing message
         setTimeout(() => navigate('/verify-email'), 2000);
       } else {
-        navigate('/dashboard');
+        // Start phone verification process
+        setMfaError('');
+        setMfaMessage('');
+        setMfaLoading(true);
+        try {
+          const res = await startPhoneEnrollment(formData.phone);
+          if (res.success) {
+            setVerificationId(res.verificationId);
+            setMfaSent(true);
+            setMfaMessage('Verification code sent to your phone. Please enter it below.');
+          } else {
+            setMfaError(res.error || 'Failed to send verification code');
+          }
+        } catch (err) {
+          setMfaError(err.message || 'Failed to send verification code');
+        }
+        setMfaLoading(false);
       }
     } else if (result.requiresGoogleLink) {
       setRequiresGoogleLink(true);
@@ -150,7 +180,7 @@ const Register = () => {
       return;
     }
 
-    // Validate required fields
+    // Validate required fields including phone for 2FA
     if (!formData.password || !formData.phone || !formData.city || !formData.state) {
       setError('Please fill in all required fields');
       setLoading(false);
@@ -172,8 +202,23 @@ const Register = () => {
     const result = await register(completeData);
 
     if (result.success) {
-      setSuccessMessage('Registration complete! Redirecting...');
-      setTimeout(() => navigate('/dashboard'), 1500);
+      // Start phone verification for Google signup too
+      setMfaError('');
+      setMfaMessage('');
+      setMfaLoading(true);
+      try {
+        const res = await startPhoneEnrollment(formData.phone);
+        if (res.success) {
+          setVerificationId(res.verificationId);
+          setMfaSent(true);
+          setMfaMessage('Verification code sent to your phone. Please enter it below.');
+        } else {
+          setMfaError(res.error || 'Failed to send verification code');
+        }
+      } catch (err) {
+        setMfaError(err.message || 'Failed to send verification code');
+      }
+      setMfaLoading(false);
     } else {
       setError(result.error);
     }
@@ -415,13 +460,14 @@ const Register = () => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="phone">Phone</label>
+              <label htmlFor="phone">Phone *</label>
               <input
                 type="tel"
                 id="phone"
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
+                required
               />
             </div>
 
@@ -455,6 +501,79 @@ const Register = () => {
               {loading ? 'Registering...' : 'Register'}
             </button>
           </form>
+
+          {/* Phone Verification after Registration */}
+          {mfaSent && (
+            <div style={{ marginTop: '2rem', padding: '1rem', border: '1px solid #ddd', borderRadius: '4px' }}>
+              <h3 style={{ marginBottom: '1rem', color: '#333' }}>Complete Phone Verification</h3>
+              
+              {mfaError && <div className="error-message">{mfaError}</div>}
+              {mfaMessage && <div className="success-message">{mfaMessage}</div>}
+
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  setMfaError('');
+                  setMfaMessage('');
+                  setMfaLoading(true);
+
+                  try {
+                    const res = await finalizePhoneEnrollment(verificationId, verificationCode, `${formData.first_name} ${formData.last_name}`);
+                    if (res.success) {
+                      setSuccessMessage('Registration and phone verification complete! Redirecting...');
+                      setTimeout(() => navigate('/dashboard'), 1500);
+                    } else {
+                      setMfaError(res.error || 'Verification failed');
+                    }
+                  } catch (err) {
+                    setMfaError(err.message || 'Verification failed');
+                  }
+
+                  setMfaLoading(false);
+                }}
+                style={{ marginTop: '1rem' }}
+              >
+                <div className="form-group">
+                  <label htmlFor="verificationCode">Enter verification code</label>
+                  <input
+                    type="text"
+                    id="verificationCode"
+                    value={verificationCode}
+                    onChange={(e) => setVerificationCode(e.target.value)}
+                    placeholder="123456"
+                    required
+                    style={{ marginBottom: '1rem' }}
+                  />
+                </div>
+
+                <button type="submit" className="btn-primary" disabled={mfaLoading} style={{ marginRight: '0.5rem' }}>
+                  {mfaLoading ? 'Verifying...' : 'Verify & Complete Registration'}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMfaSent(false);
+                    setVerificationId(null);
+                    setVerificationCode('');
+                    setMfaMessage('');
+                    setMfaError('');
+                  }}
+                  disabled={mfaLoading}
+                  style={{
+                    padding: '0.75rem 1rem',
+                    backgroundColor: '#f5f5f5',
+                    color: '#666',
+                    border: '1px solid #ddd',
+                    borderRadius: '4px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Cancel
+                </button>
+              </form>
+            </div>
+          )}
 
           <div className="form-divider"></div>
 
@@ -503,6 +622,7 @@ const Register = () => {
           Already have an account? <Link to="/login">Login here</Link>
         </p>
       </div>
+      <div id="recaptcha-container" />
     </div>
   );
 };
