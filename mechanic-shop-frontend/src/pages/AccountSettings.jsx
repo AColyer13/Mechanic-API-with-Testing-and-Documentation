@@ -382,21 +382,21 @@ const AccountSettings = () => {
           {/* Delete Account */}
           <div className="bg-white rounded-xl shadow-md p-4 md:p-6 lg:p-8">
             <h2 className="text-xl md:text-2xl font-bold text-red-800 mb-4">
-              Danger Zone
+              Delete Account
             </h2>
 
             <div className="bg-red-50 border border-red-200 rounded p-4">
               <h3 className="text-lg font-semibold text-red-800 mb-2">Delete Account</h3>
               <p className="text-red-700 mb-4">
-                Once you delete your account, there is no going back. This will permanently delete your account
-                and remove all your data from our servers, including all service tickets and personal information.
+                Once deleted, this action cannot be undone. All data, including service tickets and personal information,
+                will be permanently removed from our servers.
               </p>
 
               <button
                 onClick={() => setShowDeleteDialog(true)}
                 className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded font-medium"
               >
-                Delete Account
+                Permanently Delete
               </button>
             </div>
           </div>
@@ -429,7 +429,7 @@ const AccountSettings = () => {
                 disabled={deleteLoading}
                 className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
               >
-                {deleteLoading ? 'Deleting...' : 'Yes, Delete Account'}
+                {deleteLoading ? 'Deleting...' : 'Yes, Delete'}
               </button>
             </div>
           </div>
