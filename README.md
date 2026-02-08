@@ -1,9 +1,7 @@
 
 # Mechanic Shop API
 
-[![Build Status](https://github.com/AColyer13/Mechanic-API---Copy-with-Testing-and-Documentation/actions/workflows/ci.yaml/badge.svg)](https://github.com/AColyer13/Mechanic-API---Copy-with-Testing-and-Documentation/actions)
-[![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/)
-[![Firebase](https://img.shields.io/badge/Firebase-Deployed-orange.svg)](https://firebase.google.com/)
+https://mechanicshopapi.web.app/login
 
 A full‑featured **RESTful API** for managing a mechanic shop, available in two versions:
 1. **Flask (Python)** - Original version with MySQL
