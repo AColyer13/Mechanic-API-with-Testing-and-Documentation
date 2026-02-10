@@ -22,7 +22,6 @@ const Register = () => {
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  const [requiresGoogleLink, setRequiresGoogleLink] = useState(false);
   const [mergeRequired, setMergeRequired] = useState(false);
   const [googleSignupData, setGoogleSignupData] = useState(null);
   const [mfaSent, setMfaSent] = useState(false);
@@ -32,7 +31,7 @@ const Register = () => {
   const [mfaMessage, setMfaMessage] = useState('');
   const [mfaError, setMfaError] = useState('');
   
-  const { register, loginWithGoogle, linkPasswordToGoogle, mergeGoogleWithPassword, startPhoneEnrollment, finalizePhoneEnrollment } = useAuth();
+  const { register, loginWithGoogle, mergeGoogleWithPassword, startPhoneEnrollment, finalizePhoneEnrollment } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -47,7 +46,6 @@ const Register = () => {
     e.preventDefault();
     setError('');
     setSuccessMessage('');
-    setRequiresGoogleLink(false);
     setMergeRequired(false);
     setLoading(true);
 
@@ -96,8 +94,11 @@ const Register = () => {
         }
         setMfaLoading(false);
       }
-    } else if (result.requiresGoogleLink) {
-      setRequiresGoogleLink(true);
+    } else if (result.requiresProfileCompletion) {
+      // If Google signed in but no Firestore profile exists, forward to Register to complete profile
+      navigate('/register', { state: { googleData: result.googleData } });
+    } else if (result.requiresAccountMerge) {
+      setMergeRequired(true);
       setError(result.error);
     } else {
       setError(result.error);
@@ -139,24 +140,6 @@ const Register = () => {
       setGoogleSignupData(location.state.googleData);
     }
   }, [location]);
-
-  const handleGoogleLink = async (e) => {
-    e.preventDefault();
-    setError('');
-    setSuccessMessage('');
-    setLoading(true);
-
-    const result = await linkPasswordToGoogle(formData.email, formData.password);
-
-    if (result.success) {
-      setSuccessMessage('Accounts linked! Redirecting...');
-      setTimeout(() => navigate('/dashboard'), 1500);
-    } else {
-      setError(result.error);
-    }
-
-    setLoading(false);
-  };
 
   const handleMergeWithPassword = async (e) => {
     e.preventDefault();
@@ -346,21 +329,6 @@ const Register = () => {
           <>
             <form onSubmit={handleSubmit}>
               {error && <div className="error-message">{error}</div>}
-              {requiresGoogleLink && (
-                <div className="success-message">
-                  This email already uses Google. Link your Google account to finish registration.
-                </div>
-              )}
-              {requiresGoogleLink && (
-                <button
-                  type="button"
-                  onClick={handleGoogleLink}
-                  disabled={loading}
-                  className="btn-google"
-                >
-                  {loading ? 'Linking...' : 'Link with Google'}
-                </button>
-              )}
               {mergeRequired && (
                 <div className="success-message">
                   We found an existing password account. Enter your password and merge to continue.

@@ -76,10 +76,8 @@ export const AuthProvider = ({ children }) => {
         try {
           const methods = await fetchSignInMethodsForEmail(auth, email);
           if (methods.includes('google.com')) {
-            return {
-              success: false,
-              error: 'This email is linked to Google. Please sign in with Google to continue.'
-            };
+            // Automatically sign in with Google instead of showing error
+            return await loginWithGoogle();
           }
         } catch (methodError) {
           console.warn('Error checking sign-in methods:', methodError);
@@ -207,6 +205,13 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
+      // First check if this email is already linked to Google
+      const methods = await fetchSignInMethodsForEmail(auth, userData.email);
+      if (methods.includes('google.com')) {
+        // Automatically sign in with Google instead of attempting registration
+        return await loginWithGoogle();
+      }
+
       // Register user via backend (which creates Firebase Auth user + Firestore profile)
       await customerAPI.register(userData);
       
@@ -228,27 +233,6 @@ export const AuthProvider = ({ children }) => {
       return loginResult;
     } catch (error) {
       const backendError = error.response?.data?.error || error.response?.data?.errors?.[0];
-
-      if (backendError === 'Email already exists') {
-        try {
-          const methods = await fetchSignInMethodsForEmail(auth, userData.email);
-          if (methods.includes('google.com')) {
-            return {
-              success: false,
-              requiresGoogleLink: true,
-              email: userData.email,
-              error: 'This email is already linked to Google. Link your Google account to finish.'
-            };
-          }
-        } catch (methodError) {
-          console.warn('Error checking sign-in methods:', methodError);
-        }
-
-        return {
-          success: false,
-          error: 'An account with this email already exists. Please log in.'
-        };
-      }
 
       return {
         success: false,
