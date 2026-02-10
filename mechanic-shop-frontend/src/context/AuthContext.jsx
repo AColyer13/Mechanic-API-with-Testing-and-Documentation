@@ -114,9 +114,7 @@ export const AuthProvider = ({ children }) => {
         return { success: true };
       } catch (error) {
         // Profile doesn't exist - need to ask user to complete it
-        // Sign them out for now and ask them to complete registration
-        await signOut(auth);
-        
+        // Leave user signed in so they can complete profile and create Firestore document
         const googleData = {
           first_name: firebaseUser.displayName?.split(' ')[0] || 'User',
           last_name: firebaseUser.displayName?.split(' ').slice(1).join(' ') || '',

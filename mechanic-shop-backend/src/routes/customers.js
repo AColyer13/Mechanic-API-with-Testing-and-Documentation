@@ -20,6 +20,49 @@ const {
 const router = express.Router();
 
 /**
+ * POST /customers/profile - Create profile for an existing authenticated Firebase user
+ * Requires a valid Firebase ID token (verifyToken middleware)
+ * Used by OAuth sign-ins (Google) to create the Firestore customer document
+ */
+router.post('/profile', verifyToken, async (req, res) => {
+  try {
+    const uid = req.user.uid;
+    const { first_name, last_name, phone, city, state } = req.body;
+
+    if (!first_name || !last_name) {
+      return res.status(400).json({ error: 'Missing required fields: first_name, last_name' });
+    }
+
+    const db = admin.firestore();
+
+    // Check if profile already exists
+    const existing = await db.collection(COLLECTIONS.CUSTOMERS).doc(uid).get();
+    if (existing.exists) {
+      return res.status(409).json({ error: 'Profile already exists' });
+    }
+
+    const customerData = {
+      first_name,
+      last_name,
+      email: req.user.email || null,
+      phone: phone || null,
+      phone_verified: false,
+      city: city || null,
+      state: state || null,
+      created_at: admin.firestore.FieldValue.serverTimestamp(),
+      uid
+    };
+
+    await db.collection(COLLECTIONS.CUSTOMERS).doc(uid).set(customerData);
+
+    return res.status(201).json({ message: 'Profile created', customer: { id: uid, ...customerData } });
+  } catch (error) {
+    console.error('Error creating profile for existing user:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+/**
  * POST /customers - Register new customer
  * Creates user in Firebase Auth and stores profile in Firestore
  */

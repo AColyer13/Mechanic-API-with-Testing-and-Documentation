@@ -49,6 +49,7 @@ api.interceptors.response.use(
 // Customer API calls
 export const customerAPI = {
   register: (data) => api.post('/customers', data),
+  createProfile: (data) => api.post('/customers/profile', data),
   // No login endpoint - Firebase Auth handles this
   getAll: () => api.get('/customers'),
   getById: (id) => api.get(`/customers/${id}`),

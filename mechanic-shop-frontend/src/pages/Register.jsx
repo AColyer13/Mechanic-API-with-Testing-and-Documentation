@@ -5,6 +5,7 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { customerAPI } from '../services/api.service';
 import './Auth.css';
 
 const Register = () => {
@@ -173,35 +174,27 @@ const Register = () => {
     setSuccessMessage('');
     setLoading(true);
 
-    // Validate password confirmation
-    if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+    // Validate required fields: phone, city, state
+    if (!formData.phone || !formData.city || !formData.state) {
+      setError('Please fill in phone, city, and state to complete registration');
       setLoading(false);
       return;
     }
 
-    // Validate required fields including phone for 2FA
-    if (!formData.password || !formData.phone || !formData.city || !formData.state) {
-      setError('Please fill in all required fields');
-      setLoading(false);
-      return;
-    }
-
-    // Create registration data from Google data + completed fields
+    // Create profile data for the existing Google user (no password)
     const completeData = {
       first_name: googleSignupData.first_name,
       last_name: googleSignupData.last_name,
       email: googleSignupData.email,
-      password: formData.password,
       phone: formData.phone,
       city: formData.city,
       state: formData.state,
     };
 
-    // Call register
-    const result = await register(completeData);
+    // Call createProfile (protected endpoint) to create Firestore profile for signed-in Google user
+    const result = await customerAPI.createProfile(completeData);
 
-    if (result.success) {
+    if (result && result.status === 201) {
       // Start phone verification for Google signup too
       setMfaError('');
       setMfaMessage('');
@@ -220,7 +213,8 @@ const Register = () => {
       }
       setMfaLoading(false);
     } else {
-      setError(result.error);
+      // Show backend error if present
+      setError(result?.data?.error || result?.error || 'Failed to complete registration');
     }
 
     setLoading(false);
@@ -273,29 +267,7 @@ const Register = () => {
                 />
               </div>
 
-              <div className="form-group">
-                <label htmlFor="google_password">Password *</label>
-                <input
-                  type="password"
-                  id="google_password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="google_confirmPassword">Confirm Password *</label>
-                <input
-                  type="password"
-                  id="google_confirmPassword"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
+              {/* No password required for Google registration - only phone/city/state */}
 
               <div className="form-group">
                 <label htmlFor="google_phone">Phone *</label>
