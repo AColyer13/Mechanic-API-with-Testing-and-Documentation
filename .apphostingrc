@@ -1,5 +1,7 @@
 {
+  "sourceDirectory": "mechanic-shop-frontend",
   "build": {
-    "runCommand": "cd mechanic-shop-frontend && npm run build"
-  }
+    "runCommand": "npm run build"
+  },
+  "outputDirectory": "mechanic-shop-frontend/dist"
 }
