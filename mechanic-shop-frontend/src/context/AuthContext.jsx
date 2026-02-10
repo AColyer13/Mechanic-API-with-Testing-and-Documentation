@@ -69,6 +69,13 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
+      // First check if this email is linked to Google
+      const methods = await fetchSignInMethodsForEmail(auth, email);
+      if (methods.includes('google.com') && !methods.includes('password')) {
+        // Email is only linked to Google, automatically sign in with Google
+        return await loginWithGoogle();
+      }
+
       await signInWithEmailAndPassword(auth, email, password);
       return { success: true };
     } catch (error) {
