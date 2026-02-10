@@ -111,7 +111,6 @@ const Register = () => {
     e.preventDefault();
     setError('');
     setSuccessMessage('');
-    setRequiresGoogleLink(false);
     setMergeRequired(false);
     setLoading(true);
 
