@@ -10,6 +10,15 @@
   overflow-x: hidden;
 }
 
+/* Prevent vertical centering from cutting off tall cards on large screens */
+@media (min-width: 1024px) {
+  .auth-container {
+    align-items: flex-start;
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+}
+
 .auth-card {
   background: rgba(255,255,255,0.98);
   padding: 2rem;

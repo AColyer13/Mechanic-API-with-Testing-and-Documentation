@@ -2,8 +2,8 @@
  * Register Page
  */
 
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { customerAPI } from '../services/api.service';
 import './Auth.css';
@@ -34,6 +34,7 @@ const Register = () => {
   
   const { register, loginWithGoogle, linkPasswordToGoogle, mergeGoogleWithPassword, startPhoneEnrollment, finalizePhoneEnrollment } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleChange = (e) => {
     setFormData({
@@ -131,6 +132,13 @@ const Register = () => {
     
     setLoading(false);
   };
+
+  // If redirected from login after Google sign-in, prefill the googleSignupData
+  useEffect(() => {
+    if (location?.state?.googleData) {
+      setGoogleSignupData(location.state.googleData);
+    }
+  }, [location]);
 
   const handleGoogleLink = async (e) => {
     e.preventDefault();

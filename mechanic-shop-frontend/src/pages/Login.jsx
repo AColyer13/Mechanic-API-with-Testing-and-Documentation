@@ -59,6 +59,9 @@ const Login = () => {
     
     if (result.success) {
       navigate('/dashboard');
+    } else if (result.requiresProfileCompletion) {
+      // If Google signed in but no Firestore profile exists, forward to Register to complete profile
+      navigate('/register', { state: { googleData: result.googleData } });
     } else if (result.requiresAccountMerge) {
       setMergeRequired(true);
       setMergeEmail(result.email || '');
