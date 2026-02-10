@@ -16,6 +16,10 @@
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
   },
+  "apphosting": {
+    "source": "mechanic-shop-frontend",
+    "buildCommand": "npm run build"
+  },
   "hosting": {
     "public": "mechanic-shop-frontend/dist",
     "ignore": [
