@@ -2,25 +2,23 @@
   min-height: 100vh;
   display: flex;
   justify-content: center;
-  align-items: flex-start;
-  padding: 1rem 1rem 2rem 1rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  align-items: center;
+  padding: 2rem 1rem;
+  background: linear-gradient(135deg, #6a7ff0 0%, #7c4bd9 100%);
   background-attachment: fixed;
   width: 100%;
   overflow-x: hidden;
 }
 
 .auth-card {
-  background: white;
-  padding: 1.5rem;
-  border-radius: 10px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  background: rgba(255,255,255,0.98);
+  padding: 2rem;
+  border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(20,20,40,0.12);
   width: 100%;
-  max-width: 500px;
+  max-width: 420px;
   word-wrap: break-word;
   overflow-wrap: break-word;
-  margin-top: 1rem;
-  margin-bottom: 2rem;
 }
 
 @media (min-width: 640px) {
@@ -36,12 +34,12 @@
 }
 
 .auth-card h2 {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
   color: #2c3e50;
   text-align: center;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
-  max-width: 100%;
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: 0.2px;
 }
 
 .form-row {
@@ -64,13 +62,15 @@
   grid-template-columns: 1fr;
   gap: 1rem;
   width: 100%;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
 }
 
-/* Stack horizontally on tablets and up */
+/* For form sections like City + State use two columns on wider screens */
 @media (min-width: 640px) {
   .form-row-three {
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 120px;
+    align-items: center;
+    gap: 0.75rem;
   }
 }
 
@@ -127,23 +127,21 @@
 .btn-primary {
   width: 100%;
   max-width: 100%;
-  padding: 0.75rem;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 0.9rem;
+  background: linear-gradient(90deg, #6a7ff0 0%, #8b5de6 100%);
   color: white;
   border: none;
-  border-radius: 4px;
+  border-radius: 8px;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.18s, box-shadow 0.18s;
   box-sizing: border-box;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
 }
 
 .btn-primary:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(107, 88, 204, 0.18);
 }
 
 .btn-primary:active:not(:disabled) {
@@ -223,9 +221,7 @@
 .auth-link {
   text-align: center;
   margin-top: 1.5rem;
-  color: #7f8c8d;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
+  color: #6b6f76;
 }
 
 .auth-link a {
