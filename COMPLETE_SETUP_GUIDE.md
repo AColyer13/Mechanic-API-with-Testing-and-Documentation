@@ -151,7 +151,7 @@ http://localhost:5001/mechanicshopapi/us-central1/api
 ## 📁 Project Structure
 
 ```
-Mechanic-API-Copy-with-Testing-and-Documentation/
+Mechanic-API-with-Testing-and-Documentation/
 ├── backend/                          # Firebase Cloud Functions
 │   ├── index.js                     # Main entry point (CORS configured)
 │   ├── src/

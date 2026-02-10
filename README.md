@@ -349,7 +349,7 @@ project-root/
 
 ## Repository & Deployment
 
-- **GitHub:** https://github.com/AColyer13/Mechanic-API---Copy-with-Testing-and-Documentation
+- **GitHub:** https://github.com/AColyer13/Mechanic-API-with-Testing-and-Documentation
 - **Hosting:** Render (24/7, HTTPS, persistent MySQL)
 - **Auto‑deployment:** on push to main
 
