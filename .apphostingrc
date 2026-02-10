@@ -1,0 +1,5 @@
+{
+  "build": {
+    "runCommand": "cd mechanic-shop-frontend && npm run build"
+  }
+}
