@@ -124,8 +124,10 @@ test.describe('Register Page Styling', () => {
     await expect(page.locator('input[name="last_name"]')).toBeVisible();
     await expect(page.locator('input[name="email"]')).toBeVisible();
     await expect(page.locator('input[name="password"]')).toBeVisible();
+    await expect(page.locator('input[name="confirmPassword"]')).toBeVisible();
     await expect(page.locator('input[name="phone"]')).toBeVisible();
-    await expect(page.locator('textarea[name="address"]')).toBeVisible();
+    await expect(page.locator('input[name="city"]')).toBeVisible();
+    await expect(page.locator('input[name="state"]')).toBeVisible();
   });
 
   test('should display form row for name fields', async ({ page }) => {
@@ -151,15 +153,18 @@ test.describe('Register Page Styling', () => {
     expect(Math.abs(col1 - col2)).toBeLessThan(10);
   });
 
-  test('should display textarea with proper styling', async ({ page }) => {
-    const textarea = page.locator('textarea[name="address"]');
-    await expect(textarea).toBeVisible();
+  test('should display city and state inputs with proper styling', async ({ page }) => {
+    const cityInput = page.locator('input[name="city"]');
+    await expect(cityInput).toBeVisible();
 
-    // Check rows attribute
-    await expect(textarea).toHaveAttribute('rows', '3');
+    const stateInput = page.locator('input[name="state"]');
+    await expect(stateInput).toBeVisible();
+
+    // Check state has maxLength
+    await expect(stateInput).toHaveAttribute('maxlength', '2');
 
     // Check border
-    const border = await textarea.evaluate((el) => {
+    const border = await cityInput.evaluate((el) => {
       return window.getComputedStyle(el).border;
     });
     expect(border).toBeTruthy();

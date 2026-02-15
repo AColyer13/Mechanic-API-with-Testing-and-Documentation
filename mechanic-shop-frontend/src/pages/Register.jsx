@@ -23,6 +23,7 @@ const Register = () => {
   const [successMessage, setSuccessMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [mergeRequired, setMergeRequired] = useState(false);
+  const [mergeConfirmation, setMergeConfirmation] = useState(false);
   const [googleSignupData, setGoogleSignupData] = useState(null);
   const [mfaSent, setMfaSent] = useState(false);
   const [verificationId, setVerificationId] = useState(null);
@@ -107,6 +108,7 @@ const Register = () => {
     } else if (result.requiresAccountMerge) {
       setMergeRequired(true);
       setError(result.error);
+      setMergeConfirmation(true); // Show confirmation
     } else {
       setError(result.error);
     }
@@ -129,6 +131,7 @@ const Register = () => {
     } else if (result.requiresAccountMerge) {
       setMergeRequired(true);
       setError(result.error);
+      setMergeConfirmation(true); // Show confirmation
     } else if (result.requiresProfileCompletion) {
       // Google signup - need to fill in password, phone, city, state
       setGoogleSignupData(result.googleData);
@@ -335,12 +338,43 @@ const Register = () => {
           <>
             <form onSubmit={handleSubmit}>
               {error && <div className="error-message">{error}</div>}
-              {mergeRequired && (
-                <div className="success-message">
-                  We found an existing password account. Enter your password and merge to continue.
+              {mergeRequired && mergeConfirmation && (
+                <div className="success-message" style={{ marginBottom: '1rem' }}>
+                  We found an existing account with this email. Would you like to merge the accounts?
+                  <div style={{ marginTop: '1rem' }}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMergeConfirmation(false);
+                        setMergeRequired(false);
+                        setError('');
+                      }}
+                      disabled={loading}
+                      className="btn-secondary"
+                      style={{ marginRight: '0.5rem' }}
+                    >
+                      No, Cancel
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMergeConfirmation(false);
+                        // Now show the password input for merge
+                      }}
+                      disabled={loading}
+                      className="btn-primary"
+                    >
+                      Yes, Merge Accounts
+                    </button>
+                  </div>
                 </div>
               )}
-              {mergeRequired && (
+              {mergeRequired && !mergeConfirmation && (
+                <div className="success-message">
+                  We found an existing account with this email. Enter your password to merge the accounts.
+                </div>
+              )}
+              {mergeRequired && !mergeConfirmation && (
                 <button
                   type="button"
                   onClick={handleMergeWithPassword}
@@ -431,18 +465,19 @@ const Register = () => {
 
             <div className="form-row-three">
               <div className="form-group">
-                <label htmlFor="city">City</label>
+                <label htmlFor="city">City *</label>
                 <input
                   type="text"
                   id="city"
                   name="city"
                   value={formData.city}
                   onChange={handleChange}
+                  required
                 />
               </div>
 
               <div className="form-group">
-                <label htmlFor="state">State</label>
+                <label htmlFor="state">State *</label>
                 <input
                   type="text"
                   id="state"
@@ -451,6 +486,7 @@ const Register = () => {
                   onChange={handleChange}
                   maxLength="2"
                   placeholder="e.g., CA"
+                  required
                 />
               </div>
             </div>

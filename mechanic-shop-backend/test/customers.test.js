@@ -35,7 +35,8 @@ describe('Customer Endpoints', function() {
       email: email,
       password: hashedPassword,
       phone: '555-1234',
-      address: '123 Test St',
+      city: 'Test City',
+      state: 'CA',
       created_at: new Date()
     });
 
@@ -64,7 +65,8 @@ describe('Customer Endpoints', function() {
         email: 'john.doe@email.com',
         password: 'SecurePass123',
         phone: '555-5678',
-        address: '456 Main St'
+        city: 'Anytown',
+        state: 'CA'
       });
 
       expect(response.status).to.equal(201);
@@ -93,7 +95,10 @@ describe('Customer Endpoints', function() {
           first_name: 'Jane',
           last_name: 'Doe',
           email: 'duplicate@email.com',
-          password: 'Password123'
+          password: 'Password123',
+          phone: '555-9999',
+          city: 'Othertown',
+          state: 'NY'
         });
         expect.fail('Should have thrown an error');
       } catch (error) {

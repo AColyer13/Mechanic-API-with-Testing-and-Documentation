@@ -29,8 +29,8 @@ router.post('/profile', verifyToken, async (req, res) => {
     const uid = req.user.uid;
     const { first_name, last_name, phone, city, state } = req.body;
 
-    if (!first_name || !last_name) {
-      return res.status(400).json({ error: 'Missing required fields: first_name, last_name' });
+    if (!first_name || !last_name || !phone || !city || !state) {
+      return res.status(400).json({ error: 'Missing required fields: first_name, last_name, phone, city, state' });
     }
 
     const db = admin.firestore();
@@ -45,10 +45,10 @@ router.post('/profile', verifyToken, async (req, res) => {
       first_name,
       last_name,
       email: req.user.email || null,
-      phone: phone || null,
+      phone,
       phone_verified: false,
-      city: city || null,
-      state: state || null,
+      city,
+      state,
       created_at: admin.firestore.FieldValue.serverTimestamp(),
       uid
     };
@@ -71,9 +71,9 @@ router.post('/', async (req, res) => {
     const { first_name, last_name, email, password, phone, city, state } = req.body;
     
     // Validation
-    if (!first_name || !last_name || !email || !password) {
+    if (!first_name || !last_name || !email || !password || !phone || !city || !state) {
       return res.status(400).json({
-        errors: ['Missing required fields: first_name, last_name, email, password']
+        errors: ['Missing required fields: first_name, last_name, email, password, phone, city, state']
       });
     }
     
@@ -97,10 +97,10 @@ router.post('/', async (req, res) => {
       first_name,
       last_name,
       email,
-      phone: phone || null,
+      phone,
       phone_verified: false,
-      city: city || null,
-      state: state || null,
+      city,
+      state,
       created_at: admin.firestore.FieldValue.serverTimestamp(),
       uid: firebaseUser.uid // Link to Firebase Auth user
     };
