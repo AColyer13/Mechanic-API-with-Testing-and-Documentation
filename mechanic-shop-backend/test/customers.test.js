@@ -280,6 +280,28 @@ describe('Customer Endpoints', function() {
       expect(response.data.message).to.include('deleted successfully');
     });
 
+    it('should allow deletion even if customer document does not exist', async () => {
+      const customer = await createTestCustomer();
+      const loginData = await loginCustomer();
+
+      // First delete the customer document directly from Firestore
+      const db = getDb();
+      await db.collection('customers').doc(customer.id).delete();
+
+      // Now try to delete through the API - should still succeed
+      const response = await axios.delete(
+        `${BASE_URL}/customers/${customer.id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${loginData.token}`
+          }
+        }
+      );
+
+      expect(response.status).to.equal(200);
+      expect(response.data.message).to.include('deleted successfully');
+    });
+
     it('should fail without authentication token', async () => {
       const customer = await createTestCustomer();
 

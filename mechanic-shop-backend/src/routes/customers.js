@@ -269,19 +269,23 @@ router.delete('/:id', verifyToken, async (req, res) => {
       return res.status(403).json({ error: 'Forbidden: You can only delete your own account' });
     }
     
-    // Check if customer exists
-    const customer = await getDocumentById(COLLECTIONS.CUSTOMERS, customerId);
-    if (!customer) {
-      return res.status(404).json({ error: 'Customer not found' });
+    // Attempt to delete customer document (ignore if it doesn't exist)
+    try {
+      await deleteDocument(COLLECTIONS.CUSTOMERS, customerId);
+    } catch (error) {
+      // Document might not exist, continue with deletion
+      console.warn('Customer document not found or already deleted:', error);
     }
     
-    // Delete customer
-    await deleteDocument(COLLECTIONS.CUSTOMERS, customerId);
-    
-    // Delete associated service tickets
-    const tickets = await getTicketsByCustomer(customerId);
-    for (const ticket of tickets) {
-      await deleteDocument(COLLECTIONS.SERVICE_TICKETS, ticket.id);
+    // Delete associated service tickets (if any exist)
+    try {
+      const tickets = await getTicketsByCustomer(customerId);
+      for (const ticket of tickets) {
+        await deleteDocument(COLLECTIONS.SERVICE_TICKETS, ticket.id);
+      }
+    } catch (error) {
+      // Tickets might not exist, continue
+      console.warn('Error deleting associated tickets:', error);
     }
     
     // Delete Firebase Auth user
