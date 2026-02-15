@@ -3,7 +3,7 @@
  * Manages user authentication state using Firebase Authentication
  */
 
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { 
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -417,27 +417,61 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const value = {
+  // Memoize functions to prevent unnecessary re-renders
+  const loginCallback = useCallback(login, []);
+  const loginWithGoogleCallback = useCallback(loginWithGoogle, []);
+  const mergeGoogleWithPasswordCallback = useCallback(mergeGoogleWithPassword, []);
+  const linkPasswordToGoogleCallback = useCallback(linkPasswordToGoogle, []);
+  const registerCallback = useCallback(register, []);
+  const logoutCallback = useCallback(logout, []);
+  const sendVerificationEmailCallback = useCallback(sendVerificationEmail, []);
+  const resetPasswordCallback = useCallback(resetPassword, []);
+  const changeEmailCallback = useCallback(changeEmail, []);
+  const refreshUserCallback = useCallback(refreshUser, []);
+  const refreshCustomerCallback = useCallback(refreshCustomer, []);
+  const loadCustomerDataCallback = useCallback(loadCustomerData, []);
+  const startPhoneEnrollmentCallback = useCallback(startPhoneEnrollment, []);
+  const finalizePhoneEnrollmentCallback = useCallback(finalizePhoneEnrollment, []);
+
+  const value = useMemo(() => ({
     customer,
     user,
     loading,
-    login,
-    loginWithGoogle,
-    mergeGoogleWithPassword,
-    linkPasswordToGoogle,
-    register,
-    logout,
-    sendVerificationEmail,
-    resetPassword,
-    changeEmail,
-    refreshUser,
-    refreshCustomer,
-    loadCustomerData,
-    startPhoneEnrollment,
-    finalizePhoneEnrollment,
+    login: loginCallback,
+    loginWithGoogle: loginWithGoogleCallback,
+    mergeGoogleWithPassword: mergeGoogleWithPasswordCallback,
+    linkPasswordToGoogle: linkPasswordToGoogleCallback,
+    register: registerCallback,
+    logout: logoutCallback,
+    sendVerificationEmail: sendVerificationEmailCallback,
+    resetPassword: resetPasswordCallback,
+    changeEmail: changeEmailCallback,
+    refreshUser: refreshUserCallback,
+    refreshCustomer: refreshCustomerCallback,
+    loadCustomerData: loadCustomerDataCallback,
+    startPhoneEnrollment: startPhoneEnrollmentCallback,
+    finalizePhoneEnrollment: finalizePhoneEnrollmentCallback,
     isAuthenticated: !!user,
     isEmailVerified: user?.emailVerified || false,
-  };
+  }), [
+    customer,
+    user,
+    loading,
+    loginCallback,
+    loginWithGoogleCallback,
+    mergeGoogleWithPasswordCallback,
+    linkPasswordToGoogleCallback,
+    registerCallback,
+    logoutCallback,
+    sendVerificationEmailCallback,
+    resetPasswordCallback,
+    changeEmailCallback,
+    refreshUserCallback,
+    refreshCustomerCallback,
+    loadCustomerDataCallback,
+    startPhoneEnrollmentCallback,
+    finalizePhoneEnrollmentCallback,
+  ]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

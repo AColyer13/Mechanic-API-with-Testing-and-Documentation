@@ -2,7 +2,7 @@
  * Dashboard Page - Fully Responsive
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { serviceTicketAPI } from '../services/api.service';
 
@@ -18,11 +18,19 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [customerLoading, setCustomerLoading] = useState(false);
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, [customer]);
+  // Memoize stats calculation
+  const calculatedStats = useMemo(() => {
+    if (!tickets.length) return stats;
+    
+    return {
+      totalTickets: tickets.length,
+      openTickets: tickets.filter(t => t.status === 'Open').length,
+      inProgressTickets: tickets.filter(t => t.status === 'In Progress').length,
+      completedTickets: tickets.filter(t => t.status === 'Completed').length,
+    };
+  }, [tickets, stats]);
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     if (!customer?.id) return;
     
     setLoading(true);
@@ -39,19 +47,16 @@ const Dashboard = () => {
       const ticketsData = response.data;
       
       setTickets(ticketsData.slice(0, 5)); // Show latest 5 tickets
-      
-      setStats({
-        totalTickets: ticketsData.length,
-        openTickets: ticketsData.filter(t => t.status === 'Open').length,
-        inProgressTickets: ticketsData.filter(t => t.status === 'In Progress').length,
-        completedTickets: ticketsData.filter(t => t.status === 'Completed').length,
-      });
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [customer?.id, customer, loadCustomerData]);
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [fetchDashboardData]);
 
   const getStatusStyle = (status) => {
     switch (status) {
@@ -86,7 +91,7 @@ const Dashboard = () => {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8 md:mb-12">
           <div className="bg-white p-4 md:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
             <div className="text-3xl md:text-4xl font-bold text-purple-600 mb-2">
-              {stats.totalTickets}
+              {calculatedStats.totalTickets}
             </div>
             <div className="text-sm md:text-base text-gray-600 font-medium">
               Total Tickets
@@ -95,7 +100,7 @@ const Dashboard = () => {
 
           <div className="bg-white p-4 md:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
             <div className="text-3xl md:text-4xl font-bold text-blue-600 mb-2">
-              {stats.openTickets}
+              {calculatedStats.openTickets}
             </div>
             <div className="text-sm md:text-base text-gray-600 font-medium">
               Open
@@ -104,7 +109,7 @@ const Dashboard = () => {
 
           <div className="bg-white p-4 md:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
             <div className="text-3xl md:text-4xl font-bold text-orange-600 mb-2">
-              {stats.inProgressTickets}
+              {calculatedStats.inProgressTickets}
             </div>
             <div className="text-sm md:text-base text-gray-600 font-medium">
               In Progress
@@ -113,7 +118,7 @@ const Dashboard = () => {
 
           <div className="bg-white p-4 md:p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
             <div className="text-3xl md:text-4xl font-bold text-green-600 mb-2">
-              {stats.completedTickets}
+              {calculatedStats.completedTickets}
             </div>
             <div className="text-sm md:text-base text-gray-600 font-medium">
               Completed

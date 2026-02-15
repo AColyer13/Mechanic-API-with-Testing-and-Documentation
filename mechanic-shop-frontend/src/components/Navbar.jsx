@@ -2,11 +2,11 @@
  * Navigation Bar Component - Fully Responsive with Dropdown Menu
  */
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, memo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-const Navbar = () => {
+const Navbar = memo(() => {
   const { isAuthenticated, customer, logout } = useAuth();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -231,6 +231,6 @@ const Navbar = () => {
       )}
     </nav>
   );
-};
+});
 
 export default Navbar;
