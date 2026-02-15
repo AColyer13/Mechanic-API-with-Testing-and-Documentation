@@ -8,7 +8,6 @@ import { getAuth } from 'firebase/auth';
 
 // Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyAja5DUvoRoBHLbhbYgBOOLG9I-_3Gk9cg",
   authDomain: "mechanicshopapi.firebaseapp.com",
   projectId: "mechanicshopapi",
   storageBucket: "mechanicshopapi.firebasestorage.app",
