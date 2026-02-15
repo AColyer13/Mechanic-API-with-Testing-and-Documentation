@@ -8,6 +8,7 @@ import { getAuth } from 'firebase/auth';
 
 // Firebase configuration
 const firebaseConfig = {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: "mechanicshopapi.firebaseapp.com",
   projectId: "mechanicshopapi",
   storageBucket: "mechanicshopapi.firebasestorage.app",
