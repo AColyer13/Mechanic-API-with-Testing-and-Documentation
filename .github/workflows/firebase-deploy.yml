@@ -28,6 +28,8 @@ jobs:
 
       - name: Build frontend
         working-directory: mechanic-shop-frontend
+        env:
+          VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
         run: npm run build
 
       - name: Install functions dependencies
