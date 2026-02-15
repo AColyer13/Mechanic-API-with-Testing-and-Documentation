@@ -192,10 +192,26 @@ router.put('/:id', verifyToken, async (req, res) => {
       return res.status(403).json({ error: 'Forbidden: You can only update your own account' });
     }
     
-    // Check if customer exists
-    const existingCustomer = await getDocumentById(COLLECTIONS.CUSTOMERS, customerId);
+    // Try to get existing customer
+    let existingCustomer = await getDocumentById(COLLECTIONS.CUSTOMERS, customerId);
+    
+    // If customer doesn't exist, create it with basic data
     if (!existingCustomer) {
-      return res.status(404).json({ error: 'Customer not found' });
+      const newCustomerData = {
+        first_name: '',
+        last_name: '',
+        email: req.user.email || '',
+        phone: null,
+        phone_verified: false,
+        city: null,
+        state: null,
+        created_at: admin.firestore.FieldValue.serverTimestamp(),
+        uid: customerId
+      };
+      
+      const db = admin.firestore();
+      await db.collection(COLLECTIONS.CUSTOMERS).doc(customerId).set(newCustomerData);
+      existingCustomer = newCustomerData;
     }
     
     const { first_name, last_name, email, phone, city, state, phone_verified } = req.body;

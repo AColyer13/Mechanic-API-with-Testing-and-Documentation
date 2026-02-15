@@ -106,6 +106,8 @@ const AccountSettings = () => {
     setMessage('');
     setLoading(true);
 
+    console.log('Attempting to update profile with customer:', customer);
+
     if (!customer?.id) {
       setError('No customer profile found');
       setLoading(false);
@@ -134,6 +136,7 @@ const AccountSettings = () => {
   };
 
   const handleDeleteAccount = async () => {
+    console.log('Attempting to delete account with customer:', customer);
     setDeleteLoading(true);
     try {
       await customerAPI.delete(customer.id);
@@ -141,6 +144,7 @@ const AccountSettings = () => {
       window.location.href = '/login'; // Redirect to login page
     } catch (err) {
       const backendError = err.response?.data?.error || 'Failed to delete account';
+      console.error('Delete account error:', backendError);
       setError(backendError);
       setShowDeleteDialog(false);
     }
