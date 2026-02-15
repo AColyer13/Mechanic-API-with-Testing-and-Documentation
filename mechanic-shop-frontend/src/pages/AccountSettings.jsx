@@ -8,7 +8,7 @@ import { useAuth } from '../context/AuthContext';
 import { customerAPI } from '../services/api.service';
 
 const AccountSettings = () => {
-  const { user, customer, changeEmail, sendVerificationEmail, refreshUser, refreshCustomer } = useAuth();
+  const { user, customer, changeEmail, sendVerificationEmail, refreshUser, refreshCustomer, loadCustomerData } = useAuth();
   const [profileForm, setProfileForm] = useState({
     first_name: '',
     last_name: '',
@@ -76,6 +76,17 @@ const AccountSettings = () => {
 
     setLoading(false);
   };
+
+  useEffect(() => {
+    const initializeCustomerData = async () => {
+      // Load full customer data if not already loaded
+      if (customer && Object.keys(customer).length <= 2) {
+        await loadCustomerData();
+      }
+    };
+    
+    initializeCustomerData();
+  }, []);
 
   useEffect(() => {
     if (customer) {

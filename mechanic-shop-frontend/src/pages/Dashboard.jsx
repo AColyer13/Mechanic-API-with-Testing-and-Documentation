@@ -7,7 +7,7 @@ import { useAuth } from '../context/AuthContext';
 import { serviceTicketAPI } from '../services/api.service';
 
 const Dashboard = () => {
-  const { customer } = useAuth();
+  const { customer, loadCustomerData } = useAuth();
   const [stats, setStats] = useState({
     totalTickets: 0,
     openTickets: 0,
@@ -16,13 +16,25 @@ const Dashboard = () => {
   });
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [customerLoading, setCustomerLoading] = useState(false);
 
   useEffect(() => {
     fetchDashboardData();
-  }, []);
+  }, [customer]);
 
   const fetchDashboardData = async () => {
+    if (!customer?.id) return;
+    
+    setLoading(true);
+    
     try {
+      // Ensure customer data is loaded
+      if (Object.keys(customer).length <= 2) { // Only has basic data
+        setCustomerLoading(true);
+        await loadCustomerData();
+        setCustomerLoading(false);
+      }
+      
       const response = await serviceTicketAPI.getByCustomer(customer.id);
       const ticketsData = response.data;
       
@@ -67,7 +79,7 @@ const Dashboard = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-6 md:mb-8">
-          Welcome back, {customer?.first_name}!
+          Welcome back, {customer?.first_name || 'User'}!
         </h1>
         
         {/* Stats Grid */}

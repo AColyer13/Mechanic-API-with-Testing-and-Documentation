@@ -162,7 +162,7 @@ router.get('/', async (req, res) => {
  */
 router.get('/:id', async (req, res) => {
   try {
-    const customer = await getDocumentById(COLLECTIONS.CUSTOMERS, req.params.id);
+    const customer = await getDocumentById(COLLECTIONS.CUSTOMERS, req.params.id, true); // Enable caching
     
     if (!customer) {
       return res.status(404).json({ error: 'Customer not found' });

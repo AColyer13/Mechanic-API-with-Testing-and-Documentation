@@ -42,25 +42,15 @@ export const AuthProvider = ({ children }) => {
       setUser(firebaseUser);
       
       if (firebaseUser) {
-        // User is signed in, load customer profile from Firestore
-        try {
-          const response = await customerAPI.getById(firebaseUser.uid);
-          // Add the ID (Firebase UID) to the customer object
-          const customerData = {
-            ...response.data,
-            id: firebaseUser.uid
-          };
-          setCustomer(customerData);
-        } catch (error) {
-          console.error('Error loading customer profile:', error);
-          // Set customer with at least the ID even if profile fetch fails
-          setCustomer({ id: firebaseUser.uid });
-        }
+        // User is signed in - customer data will be loaded lazily when needed
+        // Set a minimal customer object with just the ID for immediate use
+        setCustomer({ id: firebaseUser.uid });
       } else {
         // User is signed out
         setCustomer(null);
       }
       
+      // Set loading to false once we have the user state
       setLoading(false);
     });
 
@@ -343,6 +333,25 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const loadCustomerData = async () => {
+    // Only load if we don't already have full customer data (more than just ID)
+    if (user && customer && Object.keys(customer).length <= 2) { // Only has id and maybe email
+      try {
+        const response = await customerAPI.getById(user.uid);
+        const customerData = {
+          ...response.data,
+          id: user.uid
+        };
+        setCustomer(customerData);
+        return { success: true, data: customerData };
+      } catch (error) {
+        console.error('Error loading customer data:', error);
+        return { success: false, error };
+      }
+    }
+    return { success: true, data: customer };
+  };
+
   // Start phone MFA enrollment: sends verification SMS and returns an id for verification
   const startPhoneEnrollment = async (phoneNumber) => {
     try {
@@ -423,6 +432,7 @@ export const AuthProvider = ({ children }) => {
     changeEmail,
     refreshUser,
     refreshCustomer,
+    loadCustomerData,
     startPhoneEnrollment,
     finalizePhoneEnrollment,
     isAuthenticated: !!user,

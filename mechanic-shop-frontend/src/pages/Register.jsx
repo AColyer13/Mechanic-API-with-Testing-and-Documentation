@@ -31,9 +31,16 @@ const Register = () => {
   const [mfaMessage, setMfaMessage] = useState('');
   const [mfaError, setMfaError] = useState('');
   
-  const { register, loginWithGoogle, mergeGoogleWithPassword, startPhoneEnrollment, finalizePhoneEnrollment } = useAuth();
+  const { register, loginWithGoogle, mergeGoogleWithPassword, startPhoneEnrollment, finalizePhoneEnrollment, isAuthenticated, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, authLoading, navigate]);
 
   const handleChange = (e) => {
     setFormData({

@@ -22,6 +22,10 @@ if (process.env.FIRESTORE_EMULATOR_HOST) {
   console.log(`🔧 Firestore configured for emulator: ${host}:${port}`);
 }
 
+// Simple in-memory cache for customer data (TTL: 5 minutes)
+const cache = new Map();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
 // Collection names
 const COLLECTIONS = {
   CUSTOMERS: 'customers',
@@ -39,14 +43,35 @@ async function getAllDocuments(collectionName) {
 }
 
 /**
- * Get a single document by ID
+ * Get a single document by ID with optional caching for customers
  */
-async function getDocumentById(collectionName, docId) {
+async function getDocumentById(collectionName, docId, useCache = false) {
+  // Check cache for customers
+  if (useCache && collectionName === COLLECTIONS.CUSTOMERS) {
+    const cacheKey = `${collectionName}:${docId}`;
+    const cached = cache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+      return cached.data;
+    }
+  }
+
   const doc = await db.collection(collectionName).doc(docId).get();
   if (!doc.exists) {
     return null;
   }
-  return { id: doc.id, ...doc.data() };
+  
+  const data = { id: doc.id, ...doc.data() };
+  
+  // Cache customer data
+  if (useCache && collectionName === COLLECTIONS.CUSTOMERS) {
+    const cacheKey = `${collectionName}:${docId}`;
+    cache.set(cacheKey, {
+      data,
+      timestamp: Date.now()
+    });
+  }
+  
+  return data;
 }
 
 /**

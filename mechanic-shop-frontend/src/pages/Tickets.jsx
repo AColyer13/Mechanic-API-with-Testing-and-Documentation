@@ -9,7 +9,7 @@ import { serviceTicketAPI } from '../services/api.service';
 import './Tickets.css';
 
 const Tickets = () => {
-  const { customer } = useAuth();
+  const { customer, loadCustomerData } = useAuth();
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('Open');
@@ -18,10 +18,19 @@ const Tickets = () => {
 
   useEffect(() => {
     fetchTickets();
-  }, []);
+  }, [customer]);
 
   const fetchTickets = async () => {
+    if (!customer?.id) return;
+    
+    setLoading(true);
+    
     try {
+      // Ensure customer data is loaded
+      if (Object.keys(customer).length <= 2) { // Only has basic data
+        await loadCustomerData();
+      }
+      
       const response = await serviceTicketAPI.getByCustomer(customer.id);
       setTickets(response.data);
     } catch (error) {

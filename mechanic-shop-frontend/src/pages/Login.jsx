@@ -2,7 +2,7 @@
  * Login Page
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import './Auth.css';
@@ -18,8 +18,15 @@ const Login = () => {
   const [mergeEmail, setMergeEmail] = useState('');
   const [mergePassword, setMergePassword] = useState('');
   
-  const { login, loginWithGoogle, mergeGoogleWithPassword } = useAuth();
+  const { login, loginWithGoogle, mergeGoogleWithPassword, isAuthenticated, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isAuthenticated, authLoading, navigate]);
 
   const handleChange = (e) => {
     setFormData({
